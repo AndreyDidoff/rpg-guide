@@ -4,7 +4,8 @@
   "description": "Criador de fichas para RPG D&D",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon src/server.js",
+    "test": "cross-env NODE_ENV=test jest"
   },
   "repository": {
     "type": "git",
@@ -23,5 +24,11 @@
   "bugs": {
     "url": "https://github.com/AndreyDN/rpg-guide/issues"
   },
-  "homepage": "https://github.com/AndreyDN/rpg-guide#readme"
+  "homepage": "https://github.com/AndreyDN/rpg-guide#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.2",
+    "knex": "^0.20.13",
+    "mysql": "^2.18.1"
+  }
 }
