@@ -10,12 +10,28 @@ const routes = express.Router();
 /*
 * Routes
 */
+
+// ONG
+routes.post('/user',celebrate({
+    [Segments.BODY] :Joi.object().keys({
+        name: Joi.string().required()
+        ,nickname: Joi.string().required()
+        ,passwd: Joi.string().required().min(8)
+        ,email: Joi.string().required().email()
+    })
+ }),user.create);
+
+
+
+
+
 // SESSION
 routes.get('/session',celebrate({
     [Segments.HEADERS]:Joi.object({
         authorization: Joi.string().required()
     }).unknown()
 }),session.create);
+/*
 // ONG
 routes.post('/ongs',celebrate({
    [Segments.BODY] :Joi.object().keys({
@@ -41,5 +57,6 @@ routes.delete('/incidents/:id',celebrate({
         id: Joi.number().required()
     })
 }),incident.delete);
+*/
 // Export routes
 module.exports = routes;
