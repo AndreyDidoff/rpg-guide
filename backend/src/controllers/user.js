@@ -111,15 +111,23 @@ module.exports = {
         // Pega parametros do Headers para variavel
         const cod_user = request.headers.authorization;
         // Consulta no banco id
-        const users = await connection(table_db).select('name','nickname','email').where({'id':routes.id,'cod':cod_user});
+        const users = await connection(table_db).select('name','nickname','email','cod').where('id',routes.id);
         // Verifica se a Key é permitida
         if(users.length>0){
-            // Resposta
-            return res.json({
-                query:routes
-                ,data:users
-                ,msg:"SUCCESS"
-            });
+            console.log(users[0])
+            if(users[0].cod==cod_user){
+                // Resposta
+                return res.json({
+                    query:routes
+                    ,data:users[0]
+                    ,msg:"SUCCESS"
+                });
+            }else{
+                // Resposta
+                return res.status(400).json({
+                    msg:"Usuário não autorizado"
+                });
+            }
         }else{
             // Resposta
             return res.status(406).json({

@@ -23,17 +23,32 @@ routes.post('/user',celebrate({
         ,email: Joi.string().required().email()
     })
  }),user.create);
+ // Get User
+routes.get('/user/:id',celebrate({
+    [Segments.PARAMS]:Joi.object().keys({
+        id: Joi.number().required()
+    }),
+    [Segments.HEADERS]:Joi.object({
+        authorization: Joi.string().required()
+    }).unknown()
+}),user.select_id);
  // Get Friends
  routes.get('/friends',celebrate({
     [Segments.QUERY]:Joi.object().keys({
         page: Joi.number()
-    })
+    }),
+    [Segments.HEADERS]:Joi.object({
+        authorization: Joi.string().required()
+    }).unknown()
 }),user.select_all_friends);
 // Delete User
 routes.delete('/user/:id',celebrate({
     [Segments.PARAMS]:Joi.object().keys({
         id: Joi.number().required()
-    })
+    }),
+    [Segments.HEADERS]:Joi.object({
+        authorization: Joi.string().required()
+    }).unknown()
 }),user.delete);
 
 
