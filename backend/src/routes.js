@@ -11,7 +11,10 @@ const routes = express.Router();
 * Routes
 */
 
-// ONG
+/*
+* Users / Friends
+*/
+// Create User
 routes.post('/user',celebrate({
     [Segments.BODY] :Joi.object().keys({
         name: Joi.string().required()
@@ -20,9 +23,18 @@ routes.post('/user',celebrate({
         ,email: Joi.string().required().email()
     })
  }),user.create);
-
-
-
+ // Get Friends
+ routes.get('/friends',celebrate({
+    [Segments.QUERY]:Joi.object().keys({
+        page: Joi.number()
+    })
+}),user.select_all_friends);
+// Delete User
+routes.delete('/user/:id',celebrate({
+    [Segments.PARAMS]:Joi.object().keys({
+        id: Joi.number().required()
+    })
+}),user.delete);
 
 
 // SESSION

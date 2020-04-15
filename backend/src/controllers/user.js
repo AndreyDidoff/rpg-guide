@@ -1,7 +1,7 @@
 // Requires
 const bcrypt = require('bcryptjs');
 const connection = require('../database/connect');
-const table_db = "RPG_users";
+let table_db = "RPG_users";
 // Exports
 module.exports = {
     /*
@@ -12,68 +12,95 @@ module.exports = {
     * * * passwd
     * * * email
     */
-    async create(request,res){
-        // Pega todos os paramentros do body e colocar na variavel
-        const body = request.body;
-        // Passa parametros body para varaveis
-        const {name,nickname,passwd,email}=body;
+   async create(request,res){
+    // Pega todos os paramentros do body e colocar na variavel
+    const body = request.body;
+    // Passa parametros body para varaveis
+    const {name,nickname,passwd,email}=body;
+    // Procura no banco se usuário já existe
+    const users = await connection(table_db).select('id').limit(1).where('email',email).orWhere('nickname',nickname);
+    // Verifica se encontrou resultados
+    if(users.length>0){
+        // Resposta
+        return res.status(406).json({
+            query:body
+            ,rows:users.length
+            ,msg:"Usuário ou e-mail já cadastrado!"
+        });
+    }else{
         // Configurando senha
         const salt = bcrypt.genSaltSync(10);
         const passwd_hash = bcrypt.hashSync(passwd,salt);
-        // Procura no banco se usuário já existe
-        const users = await connection(table_db).select('id').limit(1).where('email',email).orWhere('nickname',nickname);
-        // Verifica se encontrou resultados
-        if(users.length>0){
-            // Resposta
-            return res.status(406).json({
-                query:body
-                ,rows:users.length
-                ,msg:"Usuário ou e-mail já cadastrado!"
-            });
-        }else{
-            // Cria variavel insert
-            const insert = {"name":name,"nickname":nickname,"passwd":passwd_hash,'email':email};
-            // Insere no banco
-            const [id] = await connection(table_db).insert(insert);
-            // Resposta
-            return res.json({
-                query:body
-                ,data:{id}
-                ,msg:"SUCCESS"
-            });
+        let cod='';
+        while(cod==''){
+            // Gera um código de 20 caracteres aleatórios
+            let cod_hash = Array(20).fill("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz").map(function(x) { return x[Math.floor(Math.random() * x.length)] }).join('');
+            // Consulta quantos tem no banco
+            const [count] = await connection(table_db).where('cod',cod_hash).count();
+            // Verifica se encontrou resultados
+            if(count['count(*)']==0){
+                // Se não tiver resultados
+                cod=cod_hash;
+            }
         }
-    },
+        // Cria variavel insert
+        const insert = {"name":name,"nickname":nickname,"passwd":passwd_hash,'email':email,'cod':cod};
+        // Insere no banco
+        const [id] = await connection(table_db).insert(insert);
+        // Resposta
+        return res.json({
+            query:body
+            ,data:{'id':id,'cod':cod}
+            ,msg:"SUCCESS"
+        });
+    }
+},
 
-    async select_all(request,res){
+    async select_all_friends(request,res){
         // Pega todos os paramentros da query e colocar na variavel
         const {page = 1} = request.query;
+        // Pega todos os paramentros do body e colocar na variavel
+        const {id} = request.body;
         // Pega parametros do Headers para variavel
-        const ONG_id = request.headers.authorization;
+        const cod_user = request.headers.authorization;
         // Consulta quantos tem no banco
-        const [count] = await connection(table_db).count();
-        // Consulta no banco id
-        const incidents = await connection(table_db)
-                                .select(table_db+'.title',table_db+'.description',table_db+'.value','ONGs.name','ONGs.city','ONGs.uf')
-                                .join('ONGs','ONGs.id','=',table_db+'.ONG_id')
-                                .limit(5)
-                                .offset((page -1)*5)
-                                .where('ONG_id',ONG_id);
+        const users = await connection(table_db).where('cod',cod_user).count();
         // Verifica se a Key é permitida
-        if(incidents.length>0){
-            // Resposta
-            res.header('X-Total-Count',count['count(*)']);
-            return res.json({
-                query:page
-                ,rows:incidents.length
-                ,data:incidents
-                ,msg:"SUCCESS"
-            });
+        if(users.length>0){
+            // Define Tabela de join
+            const join_table = 'RPG_user_friends';
+            // Consulta quantos tem no banco
+            const [count] = await connection(table_db).where('cod',cod_user).count();
+            // Consulta no banco id
+            const friends = await connection(table_db)
+                                    .select(table_db+'.name',table_db+'.nickname',join_table+'.authorization')
+                                    .join(join_table,function(){
+                                          this.on(join_table+'.id_user',id)
+                                          .on(join_table+'.id_friend',table_db+'.id');
+                                      })
+                                    .limit(5)
+                                    .offset((page -1)*5);
+            if(friends.length>0){
+                // Resposta
+                res.header('X-Total-Count',count['count(*)']);
+                return res.json({
+                    query:{'id':id,'page':page}
+                    ,all_rows:count['count(*)']
+                    ,rows:friends.length
+                    ,data:friends
+                    ,msg:"SUCCESS"
+                });
+            }else{
+                // Resposta
+                return res.status(406).json({
+                    query:id,
+                    msg:"Usuário sem Amigos"
+                });
+            }
         }else{
             // Resposta
-            return res.status(406).json({
-                query:page
-                ,rows:incidents.length
-                ,msg:"NO INCIDENTS"
+            return res.status(400).json({
+                msg:"Usuário não autorizado"
             });
         }
     },
@@ -82,17 +109,15 @@ module.exports = {
         // Pega todos os paramentros da rota e colocar na variavel
         const routes = request.params;
         // Pega parametros do Headers para variavel
-        const ONG_id = request.headers.authorization;
+        const cod_user = request.headers.authorization;
         // Consulta no banco id
-        const incidents = await connection(table_db).select('title','description','value').where({'id':routes.id,'ONG_id':ONG_id});
-        console.log(incidents)
+        const users = await connection(table_db).select('name','nickname','email').where({'id':routes.id,'cod':cod_user});
         // Verifica se a Key é permitida
-        if(incidents.length>0){
+        if(users.length>0){
             // Resposta
             return res.json({
                 query:routes
-                ,rows:incidents.length
-                ,data:incidents
+                ,data:users
                 ,msg:"SUCCESS"
             });
         }else{
@@ -108,15 +133,15 @@ module.exports = {
         // Pega todos os paramentros da rota e colocar na variavel
         const routes = request.params;
         // Pega parametros do Headers para variavel
-        const ONG_id = request.headers.authorization;
+        const cod_user = request.headers.authorization;
         // Consulta no banco id
-        const incident = await connection(table_db).select('ONG_id').where('id',routes.id).first();
+        const user = await connection(table_db).select('cod').where('id',routes.id).first();
         // Verfica se a ONG pode apagar esse incidente
-        if(!incident){
-            return res.status(406).json({msg:"INCIDENT NO EXISTS"});
+        if(!user){
+            return res.status(406).json({msg:"Usuário não encontrado"});
         }
-        if(ONG_id!==incident.ONG_id){
-            return res.status(401).json({msg:"UNAUTHORIZED"});
+        if(cod_user!==user.cod){
+            return res.status(401).json({msg:"Usuário não Autorizado"});
         }
         // Deleta da base
         await connection(table_db).where('id',routes.id).delete();
