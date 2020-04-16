@@ -1,63 +1,103 @@
 // Requires
-const express = require('express');
-const {celebrate,Segments,Joi} = require('celebrate');
+const express = require("express");
+const { celebrate, Segments, Joi } = require("celebrate");
 // Controllers
-const user = require('./controllers/user');
-const session = require('./controllers/session');
-const guide = require('./controllers/guide');
+const user = require("./controllers/user");
+const session = require("./controllers/session");
+const guide = require("./controllers/guide");
 // Variables
 const routes = express.Router();
-/*
-* Routes
-*/
 
 /*
-* Users / Friends
-*/
+ * Users / Friends
+ */
+
 // Create User
-routes.post('/user',celebrate({
-    [Segments.BODY] :Joi.object().keys({
-        name: Joi.string().required()
-        ,nickname: Joi.string().required()
-        ,passwd: Joi.string().required().min(8)
-        ,email: Joi.string().required().email()
-    })
- }),user.create);
- // Get User
-routes.get('/user/:id',celebrate({
-    [Segments.PARAMS]:Joi.object().keys({
-        id: Joi.number().required()
+routes.post(
+  "/user",
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string().required(),
+      nickname: Joi.string().required(),
+      passwd: Joi.string().required().min(8),
+      email: Joi.string().required().email(),
     }),
-    [Segments.HEADERS]:Joi.object({
-        authorization: Joi.string().required()
-    }).unknown()
-}),user.select_id);
- // Get Friends
- routes.get('/friends',celebrate({
-    [Segments.QUERY]:Joi.object().keys({
-        page: Joi.number()
+  }),
+  user.create
+);
+// Get User
+routes.get(
+  "/user/:id",
+  celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+      id: Joi.number().required(),
     }),
-    [Segments.HEADERS]:Joi.object({
-        authorization: Joi.string().required()
-    }).unknown()
-}),user.select_all_friends);
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+  }),
+  user.select_id
+);
+// Get Friends
+routes.get(
+  "/friends",
+  celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number(),
+    }),
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+  }),
+  user.select_all_friends
+);
 // Delete User
-routes.delete('/user/:id',celebrate({
-    [Segments.PARAMS]:Joi.object().keys({
-        id: Joi.number().required()
+routes.delete(
+  "/user/:id",
+  celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+      id: Joi.number().required(),
     }),
-    [Segments.HEADERS]:Joi.object({
-        authorization: Joi.string().required()
-    }).unknown()
-}),user.delete);
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+  }),
+  user.delete
+);
 
+/*
+ * SESSION
+ */
 
-// SESSION
-routes.get('/session',celebrate({
-    [Segments.HEADERS]:Joi.object({
-        authorization: Joi.string().required()
-    }).unknown()
-}),session.create);
+// Create session
+routes.post(
+  "/session",
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      nickname: Joi.string().required(),
+      passwd: Joi.string().required().min(8),
+    }),
+  }),
+  session.create
+);
+// Get session
+routes.get(
+  "/session",
+  celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+  }),
+  session.create
+);
+// Delete session
+
+// Mod session
+
+/*
+ *
+ */
+
 /*
 // ONG
 routes.post('/ongs',celebrate({
