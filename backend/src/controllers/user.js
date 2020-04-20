@@ -69,7 +69,7 @@ module.exports = {
       // Resposta
       return res.json({
         query: body,
-        data: { id: id, cod: cod },
+        data: { id: id },
         msg: "SUCCESS",
       });
     }
@@ -83,13 +83,27 @@ module.exports = {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
     // Consulta quantos tem no banco
-    const users = await connection(table_db).where("cod", cod_user).count();
+    const [count_users] = await connection(table_db)
+      .where("cod", cod_user)
+      .count();
     // Verifica se a Key é permitida
-    if (users.length > 0) {
+    if (count_users["count(*)"] > 0) {
       // Define Tabela de join
       const join_table = "RPG_user_friends";
       // Consulta quantos tem no banco
-      const [count] = await connection(table_db).where("cod", cod_user).count();
+      const [count_friends] = await connection(table_db)
+        .select(
+          table_db + ".name",
+          table_db + ".nickname",
+          join_table + ".authorization"
+        )
+        .join(join_table, function () {
+          this.on(join_table + ".id_user", id).on(
+            join_table + ".id_friend",
+            table_db + ".id"
+          );
+        })
+        .count();
       // Consulta no banco id
       const friends = await connection(table_db)
         .select(
@@ -105,12 +119,12 @@ module.exports = {
         })
         .limit(5)
         .offset((page - 1) * 5);
-      if (friends.length > 0) {
+      if (count_friends["count(*)"] > 0) {
         // Resposta
-        res.header("X-Total-Count", count["count(*)"]);
+        res.header("X-Total-Count", count_friends["count(*)"]);
         return res.json({
           query: { id: id, page: page },
-          all_rows: count["count(*)"],
+          all_rows: count_friends["count(*)"],
           rows: friends.length,
           data: friends,
           msg: "SUCCESS",

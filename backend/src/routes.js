@@ -95,8 +95,11 @@ routes.get(
 // Mod session
 
 /*
- *
+ * Guide
  */
+
+// Create Guide
+routes.post("/guide", guide.create);
 
 /*
 // ONG
