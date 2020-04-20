@@ -5,30 +5,24 @@ let table_db = "RPG_users";
 // Exports
 module.exports = {
   /*
-   * Criar um novo usuário:
-   * * Parametros de Entrada:
-   * * * name
-   * * * nickname
-   * * * passwd
-   * * * email
+   * Users
    */
+  // Create User
   async create(request, res) {
     // Pega todos os paramentros do body e colocar na variavel
-    const body = request.body;
-    // Passa parametros body para varaveis
-    const { name, nickname, passwd, email } = body;
+    const { name, nickname, passwd, email } = request.body;
     // Procura no banco se usuário já existe
-    const users = await connection(table_db)
+    const [count_user] = await connection(table_db)
       .select("id")
       .limit(1)
       .where("email", email)
-      .orWhere("nickname", nickname);
+      .orWhere("nickname", nickname)
+      .count();
     // Verifica se encontrou resultados
-    if (users.length > 0) {
+    if (count_user["count(*)"] > 0) {
       // Resposta
       return res.status(406).json({
-        query: body,
-        rows: users.length,
+        query: { name, nickname, passwd, email },
         msg: "Usuário ou e-mail já cadastrado!",
       });
     } else {
@@ -47,11 +41,11 @@ module.exports = {
           })
           .join("");
         // Consulta quantos tem no banco
-        const [count] = await connection(table_db)
+        const [count_cod] = await connection(table_db)
           .where("cod", cod_hash)
           .count();
         // Verifica se encontrou resultados
-        if (count["count(*)"] == 0) {
+        if (count_cod["count(*)"] == 0) {
           // Se não tiver resultados
           cod = cod_hash;
         }
@@ -68,13 +62,243 @@ module.exports = {
       const [id] = await connection(table_db).insert(insert);
       // Resposta
       return res.json({
-        query: body,
+        query: {
+          name: name,
+          nickname: nickname,
+          passwd: passwd_hash,
+          email: email,
+        },
         data: { id: id },
         msg: "SUCCESS",
       });
     }
   },
-
+  // Select User using id
+  async select_id(request, res) {
+    // Pega todos os paramentros da rota e colocar na variavel
+    const { id } = request.params;
+    // Pega parametros do Headers para variavel
+    const cod_user = request.headers.authorization;
+    // Consulta no banco id
+    const users = await connection(table_db)
+      .select("name", "nickname", "email", "cod")
+      .where("id", id)
+      .limit(1);
+    // Verifica se a Key é permitida
+    if (users.length > 0) {
+      if (users[0].cod == cod_user) {
+        // Resposta
+        return res.json({
+          data: users[0],
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(400).json({
+          msg: "Usuário não autorizado",
+        });
+      }
+    } else {
+      // Resposta
+      return res.status(406).json({
+        query: routes,
+        msg: "ID NO EXISTS",
+      });
+    }
+  },
+  // Delete User
+  async delete(request, res) {
+    // Pega todos os paramentros da rota e colocar na variavel
+    const { id } = request.params;
+    // Pega parametros do Headers para variavel
+    const cod_user = request.headers.authorization;
+    // Consulta no banco id
+    const user = await connection(table_db)
+      .select("cod")
+      .where("id", id)
+      .first();
+    // Verfica se a ONG pode apagar esse incidente
+    if (!user) {
+      return res.status(406).json({ msg: "Usuário não encontrado" });
+    }
+    if (cod_user !== user.cod) {
+      return res.status(401).json({ msg: "Usuário não Autorizado" });
+    }
+    // Deleta da base
+    await connection(table_db).where("id", id).delete();
+    // Resposta
+    return res.json({
+      msg: "SUCCESS",
+    });
+  },
+  // Create Friend
+  async create_friend(request, res) {
+    // Pega todos os paramentros do body e colocar na variavel
+    const { id_user, id_friend } = request.body;
+    // Pega parametros do Headers para variavel
+    const cod_user = request.headers.authorization;
+    // Consulta no banco id
+    const users = await connection(table_db)
+      .select("cod")
+      .where("id", id_user)
+      .limit(1);
+    // Verifica se a Key é permitida
+    if (users.length > 0) {
+      if (users[0].cod == cod_user) {
+        // Consulta se já é amigo
+        const [count_friend] = await connection("RPG_user_friends")
+          .where({ id_user: id_user, id_friend: id_friend })
+          .count();
+        // Verfica se são amigos
+        if (count_friend["count(*)"] === 0) {
+          // Consulta se amigo já pediu amizade
+          const friend = await connection("RPG_user_friends")
+            .select("authorization")
+            .where({ id_user: id_friend, id_friend: id_user })
+            .limit(1);
+          // Verifica se amigo já pediu amizade
+          if (friend.length > 0 && friend[0].authorization === 0) {
+            // Atualiza amizade
+            await connection("RPG_user_friends")
+              .update({ authorization: 1 })
+              .where({ id_user: id_friend, id_friend: id_user });
+            // Resposta
+            return res.json({
+              msg: "Amigo já pediu amizade. Amizade Aceita",
+            });
+          } else if (friend.length > 0 && friend[0].authorization === 1) {
+            // Resposta
+            return res.status(406).json({
+              msg: "Usuário já são amigos",
+            });
+          } else {
+            const [id] = await connection("RPG_user_friends").insert({
+              id_user: id_user,
+              id_friend: id_friend,
+            });
+            // Resposta
+            return res.json({
+              query: { id_user: id_user, id_friend: id_friend },
+              data: { id: id },
+              msg: "SUCCESS",
+            });
+          }
+        } else {
+          // Resposta
+          return res.status(406).json({
+            msg: "Usuário já são amigos",
+          });
+        }
+      } else {
+        // Resposta
+        return res.status(400).json({
+          msg: "Usuário não autorizado",
+        });
+      }
+    } else {
+      // Resposta
+      return res.status(406).json({
+        query: routes,
+        msg: "ID NO EXISTS",
+      });
+    }
+  },
+  // Update Friend
+  async update_friend(request, res) {
+    // Pega todos os paramentros do body e colocar na variavel
+    const { id_user, id_friend, authorization } = request.body;
+    // Pega parametros do Headers para variavel
+    const cod_user = request.headers.authorization;
+    // Consulta no banco id
+    const users = await connection(table_db)
+      .select("cod")
+      .where("id", id_user)
+      .limit(1);
+    // Verifica se a Key é permitida
+    if (users.length > 0) {
+      if (users[0].cod == cod_user) {
+        // Consulta se já é amigo do usuário
+        const [count_user] = await connection("RPG_user_friends")
+          .where({ id_user: id_user, id_friend: id_friend })
+          .count();
+        // Define 0 para não encontro, 1 para friend e 2 para usuário
+        let friend = 0;
+        // Verifica de é amigo do usuário
+        if (count_user["count(*)"] === 0) {
+          // Não é amigo do usuário, Consulta se amigo tem esse usuário
+          const [count_friend] = await connection("RPG_user_friends")
+            .where({ id_user: id_user, id_friend: id_friend })
+            .count();
+          // Verifica se amigo tem esse usuário
+          if (count_friend["count(*)"] !== 0) {
+            // Define que é amigo do usuário
+            friend = 1;
+          } else {
+            // Resposta
+            return res.status(406).json({
+              msg: "Usuário não são amigos",
+            });
+          }
+        } else {
+          // Define que o usuário é amigo
+          friend = 2;
+        }
+        // Verfica se são amigos
+        if (friend !== 0) {
+          // Verifica o que o usuário quer fazer aceitar ou tirar um amigo
+          if (authorization === 0) {
+            if (friend == 1) {
+              // Atualiza amizade
+              await connection("RPG_user_friends")
+                .where({ id_user: id_friend, id_friend: id_user })
+                .delete();
+            } else {
+              // Atualiza amizade
+              await connection("RPG_user_friends")
+                .where({ id_user: id_user, id_friend: id_friend })
+                .delete();
+            }
+            // Resposta
+            return res.json({
+              msg: "Não são mais amigos",
+            });
+          } else {
+            if (friend == 1) {
+              await connection("RPG_user_friends")
+                .update({ authorization: 1 })
+                .where({ id_user: id_friend, id_friend: id_user });
+            } else {
+              // Resposta
+              return res.status(400).json({
+                msg: "Usuário não pode aceitar ele mesmo",
+              });
+            }
+            // Resposta
+            return res.json({
+              msg: "Usuário são amigos Agora",
+            });
+          }
+        } else {
+          // Resposta
+          return res.status(406).json({
+            msg: "Usuário não são amigos",
+          });
+        }
+      } else {
+        // Resposta
+        return res.status(400).json({
+          msg: "Usuário não autorizado",
+        });
+      }
+    } else {
+      // Resposta
+      return res.status(406).json({
+        query: routes,
+        msg: "ID NO EXISTS",
+      });
+    }
+  },
+  // Select All Friends
   async select_all_friends(request, res) {
     // Pega todos os paramentros da query e colocar na variavel
     const { page = 1 } = request.query;
@@ -142,65 +366,5 @@ module.exports = {
         msg: "Usuário não autorizado",
       });
     }
-  },
-
-  async select_id(request, res) {
-    // Pega todos os paramentros da rota e colocar na variavel
-    const routes = request.params;
-    // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
-    // Consulta no banco id
-    const users = await connection(table_db)
-      .select("name", "nickname", "email", "cod")
-      .where("id", routes.id);
-    // Verifica se a Key é permitida
-    if (users.length > 0) {
-      console.log(users[0]);
-      if (users[0].cod == cod_user) {
-        // Resposta
-        return res.json({
-          query: routes,
-          data: users[0],
-          msg: "SUCCESS",
-        });
-      } else {
-        // Resposta
-        return res.status(400).json({
-          msg: "Usuário não autorizado",
-        });
-      }
-    } else {
-      // Resposta
-      return res.status(406).json({
-        query: routes,
-        msg: "ID NO EXISTS",
-      });
-    }
-  },
-
-  async delete(request, res) {
-    // Pega todos os paramentros da rota e colocar na variavel
-    const routes = request.params;
-    // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
-    // Consulta no banco id
-    const user = await connection(table_db)
-      .select("cod")
-      .where("id", routes.id)
-      .first();
-    // Verfica se a ONG pode apagar esse incidente
-    if (!user) {
-      return res.status(406).json({ msg: "Usuário não encontrado" });
-    }
-    if (cod_user !== user.cod) {
-      return res.status(401).json({ msg: "Usuário não Autorizado" });
-    }
-    // Deleta da base
-    await connection(table_db).where("id", routes.id).delete();
-    // Resposta
-    return res.json({
-      query: routes,
-      msg: "SUCCESS",
-    });
   },
 };

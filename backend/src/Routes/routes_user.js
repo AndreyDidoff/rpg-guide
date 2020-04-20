@@ -21,44 +21,73 @@ routes_user.post(
   }),
   user.create
 );
-// Get User
+// Select User id
 routes_user.get(
   "/user/:id",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.number().required(),
     }),
-    [Segments.HEADERS]: Joi.object({
-      authorization: Joi.string().required(),
-    }).unknown(),
   }),
   user.select_id
-);
-// Get Friends
-routes_user.get(
-  "/friends",
-  celebrate({
-    [Segments.QUERY]: Joi.object().keys({
-      page: Joi.number(),
-    }),
-    [Segments.HEADERS]: Joi.object({
-      authorization: Joi.string().required(),
-    }).unknown(),
-  }),
-  user.select_all_friends
 );
 // Delete User
 routes_user.delete(
   "/user/:id",
   celebrate({
-    [Segments.PARAMS]: Joi.object().keys({
-      id: Joi.number().required(),
-    }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.PARAMS]: Joi.object().keys({
+      id: Joi.number().required(),
+    }),
   }),
   user.delete
+);
+// Create Friend
+routes_user.post(
+  "/friend",
+  celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+      id_friend: Joi.number().required(),
+    }),
+  }),
+  user.create_friend
+);
+// Select All Friends
+routes_user.get(
+  "/friends",
+  celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number(),
+    }),
+  }),
+  user.select_all_friends
+);
+// Create Friend
+routes_user.put(
+  "/friend",
+  celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+      id_friend: Joi.number().required(),
+      authorization: Joi.number().required(),
+    }),
+  }),
+  user.update_friend
 );
 // Export routes_user
 module.exports = routes_user;
