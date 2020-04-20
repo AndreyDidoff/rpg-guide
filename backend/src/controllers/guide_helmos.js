@@ -1,12 +1,12 @@
 // Requires
 const connection = require("../database/connect");
-const table_db = "RPG_guide_armor";
+const table_db = "RPG_guide_helmos";
 // Exports
 module.exports = {
   /*
-   * Armor
+   * Helmos
    */
-  // Create Armor
+  // Create Helmos
   async create(request, res) {
     // Pega itens do body
     let {
@@ -32,10 +32,10 @@ module.exports = {
         // Verifica se usuário pode adicionar
         if (user[0].id === guide[0].id_user) {
           // Consultar se o usuário já tem:
-          const [count_armor] = await connection(table_db)
+          const [count_helmo] = await connection(table_db)
             .where("id_guide", id_guide)
             .count();
-          if (count_armor["count(*)"] === 0) {
+          if (count_helmo["count(*)"] === 0) {
             // criar insert do banco
             let insert = {
               id_guide: id_guide,
@@ -60,7 +60,7 @@ module.exports = {
             // Resposta
             return res.status(400).json({
               msg:
-                "Limite de Armaduras Atingido. Adcionar a mochila ou excluir uma armadura.",
+                "Limite de Capacetes Atingido. Adcionar a mochila ou excluir uma capacete.",
             });
           }
         } else {
@@ -82,8 +82,8 @@ module.exports = {
       });
     }
   },
-  // Select All Armors
-  async select_all_armors(request, res) {
+  // Select All Helmos
+  async select_all_helmos(request, res) {
     // Pega itens do body
     const { id_guide } = request.body;
     // Pega parametros do Headers para variavel
@@ -138,8 +138,8 @@ module.exports = {
       });
     }
   },
-  // Update Guide
-  async update_armor(request, res) {
+  // Update Helmo
+  async update_helmo(request, res) {
     // Pega itens do body
     let {
       id_guide,
@@ -148,7 +148,7 @@ module.exports = {
       property_especial = "",
     } = request.body;
     // Pega todos os paramentros da rota e colocar na variavel
-    const { id_armor } = request.params;
+    const { id_helmo } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
     // Consulta quantos tem no banco
@@ -158,18 +158,18 @@ module.exports = {
     // Veriricar se encotrou no banco o usuário
     if (user.length > 0) {
       // Consultar se o usuário já tem um personagem com o mesmo nome:
-      const armor = await connection(table_db)
+      const helmo = await connection(table_db)
         .select(".RPG_guide.id_user", ".RPG_guide.id")
         .join("RPG_guide", function () {
           this.on({
             "RPG_guide.id": id_guide,
           });
         })
-        .where(table_db + ".id", id_armor);
+        .where(table_db + ".id", id_helmo);
       // Verificar se achou:
-      if (armor.length > 0) {
-        // Verifica se usuário pode adicionar armors
-        if (user[0].id === armor[0].id_user) {
+      if (helmo.length > 0) {
+        // Verifica se usuário pode adicionar helmos
+        if (user[0].id === helmo[0].id_user) {
           // Faz o Update
           await connection(table_db)
             .update({
@@ -177,7 +177,7 @@ module.exports = {
               extra_bonus: extra_bonus,
               property_especial: property_especial,
             })
-            .where({ id: id_armor });
+            .where({ id: id_helmo });
           // Resposta
           return res.json({
             query: {
@@ -196,7 +196,7 @@ module.exports = {
       } else {
         // Resposta
         return res.status(404).json({
-          msg: "Arma não encontrada",
+          msg: "Capacete não encontrada",
         });
       }
     } else {
@@ -206,10 +206,10 @@ module.exports = {
       });
     }
   },
-  // Delete All Guides
-  async delete_armor(request, res) {
+  // Delete Helmo
+  async delete_helmo(request, res) {
     // Pega todos os paramentros da rota e colocar na variavel
-    const { id_armor } = request.params;
+    const { id_helmo } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
     // Consulta quantos tem no banco
@@ -223,15 +223,15 @@ module.exports = {
         .select(".RPG_guide.id_user", "RPG_guide.id")
         .join("RPG_guide", function () {
           this.on({
-            "RPG_guide_armor.id_guide": "RPG_guide.id",
+            "RPG_guide_helmos.id_guide": "RPG_guide.id",
           });
         })
-        .where(table_db + ".id", id_armor);
+        .where(table_db + ".id", id_helmo);
       // Verificar se achou:
       if (armor.length > 0) {
         // Verifica se usuário pode adicionar armors
         if (user[0].id === armor[0].id_user) {
-          await connection(table_db).where("id", id_armor).delete();
+          await connection(table_db).where("id", id_helmo).delete();
           // Resposta
           return res.json({
             msg: "SUCCESS",

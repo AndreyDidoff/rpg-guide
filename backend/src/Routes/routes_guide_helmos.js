@@ -2,15 +2,15 @@
 const express = require("express");
 const { celebrate, Segments, Joi } = require("celebrate");
 // Controllers
-const guide_armor = require("../controllers/guide_armor");
+const guide_helmos = require("../controllers/guide_helmos");
 // Variables
-const routes_guide_armor = express.Router();
+const routes_guide_helmos = express.Router();
 /*
- * guide_armor
+ * guide_helmos
  */
-// Create guide_armor
-routes_guide_armor.post(
-  "/armor",
+// Create guide_helmos
+routes_guide_helmos.post(
+  "/helmos",
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       id_guide: Joi.number().required(),
@@ -19,11 +19,11 @@ routes_guide_armor.post(
       property_especial: Joi.string(),
     }),
   }),
-  guide_armor.create
+  guide_helmos.create
 );
-// Select All guide_armors
-routes_guide_armor.get(
-  "/armor",
+// Select All guide_helmoss
+routes_guide_helmos.get(
+  "/helmos",
   celebrate({
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
@@ -32,17 +32,17 @@ routes_guide_armor.get(
       id_guide: Joi.number().required(),
     }),
   }),
-  guide_armor.select_all_armors
+  guide_helmos.select_all_helmos
 );
-// Update guide_armor
-routes_guide_armor.put(
-  "/armor/:id_armor",
+// Update guide_helmos
+routes_guide_helmos.put(
+  "/helmos/:id_helmo",
   celebrate({
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.PARAMS]: Joi.object().keys({
-      id_armor: Joi.number().required(),
+      id_helmo: Joi.number().required(),
     }),
     [Segments.BODY]: Joi.object().keys({
       id_guide: Joi.number().required(),
@@ -51,20 +51,20 @@ routes_guide_armor.put(
       property_especial: Joi.string(),
     }),
   }),
-  guide_armor.update_armor
+  guide_helmos.update_helmo
 );
-// Delete guide_armor
-routes_guide_armor.delete(
-  "/armor/:id_armor",
+// Delete guide_helmos
+routes_guide_helmos.delete(
+  "/helmos/:id_helmo",
   celebrate({
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.PARAMS]: Joi.object().keys({
-      id_armor: Joi.number().required(),
+      id_helmo: Joi.number().required(),
     }),
   }),
-  guide_armor.delete_armor
+  guide_helmos.delete_helmo
 );
-// Export routes_guide_armor
-module.exports = routes_guide_armor;
+// Export routes_guide_helmos
+module.exports = routes_guide_helmos;
