@@ -109,7 +109,5 @@ routes_guide.delete(
   }),
   guide.delete_guide
 );
-// Mod guide
-
 // Export routes_guide
 module.exports = routes_guide;

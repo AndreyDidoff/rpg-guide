@@ -1,6 +1,4 @@
 // Requires
-const bcrypt = require("bcryptjs");
-const moment = require("moment");
 const connection = require("../database/connect");
 const table_db = "RPG_guide";
 // Exports
