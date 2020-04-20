@@ -37,7 +37,7 @@ routes_others.post(
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
-      dice_life: Joi.integer().required(),
+      dice_life: Joi.number().required(),
     }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
@@ -68,7 +68,6 @@ routes_others.get(
   }),
   others.select_all_classes
 );
-
 // Create New Color Eye
 routes_others.post(
   "/color_eye",
@@ -168,7 +167,7 @@ routes_others.post(
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
       circle: Joi.string().required(),
-      level: Joi.integer().required(),
+      level: Joi.number().required(),
       formulation_time: Joi.string().required(),
       duraction: Joi.string().required(),
       reach: Joi.string().required(),
@@ -211,7 +210,7 @@ routes_others.post(
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
-      initials: Joi.string().required(),
+      initials: Joi.string().required().length(2),
     }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
@@ -248,16 +247,16 @@ routes_others.post(
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
-      level: Joi.integer(),
-      force_add: Joi.integer(),
-      dexterity_add: Joi.integer(),
-      constitution_add: Joi.integer(),
-      intelligence_add: Joi.integer(),
-      wisdom_add: Joi.integer(),
-      charisma_add: Joi.integer(),
-      displacement: Joi.integer(),
-      min_age: Joi.integer(),
-      max_age: Joi.integer(),
+      level: Joi.number(),
+      force_add: Joi.number(),
+      dexterity_add: Joi.number(),
+      constitution_add: Joi.number(),
+      intelligence_add: Joi.number(),
+      wisdom_add: Joi.number(),
+      charisma_add: Joi.number(),
+      displacement: Joi.number(),
+      min_age: Joi.number(),
+      max_age: Joi.number(),
     }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
@@ -265,7 +264,7 @@ routes_others.post(
   }),
   others.create_race
 );
-// Select Money Using id
+// Select Race Using id
 routes_others.get(
   "/race/:id",
   celebrate({
@@ -278,7 +277,7 @@ routes_others.get(
   }),
   others.select_race_id
 );
-// Select All Moneys
+// Select All Races
 routes_others.get(
   "/race",
   celebrate({
@@ -290,7 +289,7 @@ routes_others.get(
 );
 // Select Cross Race Languages
 routes_others.get(
-  "/race_languages",
+  "/race_languages/:id_race",
   celebrate({
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
@@ -307,8 +306,8 @@ routes_others.post(
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
-      height: Joi.integer(),
-      width: Joi.integer(),
+      height: Joi.number(),
+      width: Joi.number(),
     }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),

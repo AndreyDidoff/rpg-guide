@@ -32,14 +32,6 @@ routes_session.get(
 // Delete session
 
 // Mod session
-
-/*
- * Guide
- */
-
-// Create Guide
-routes_session.post("/guide", guide.create);
-
 /*
 // ONG
 routes_session.post('/ongs',celebrate({

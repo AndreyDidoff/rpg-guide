@@ -1,6 +1,4 @@
 // Requires
-const bcrypt = require("bcryptjs");
-const moment = require("moment");
 const connection = require("../database/connect");
 // Exports
 module.exports = {
@@ -20,10 +18,10 @@ module.exports = {
     // Veriricar se encotrou no banco o usuário
     if (count["count(*)"] > 0) {
       // Inserir no banco os dados
-      const [id] = await connection("RPG_alignment").insert("name", name);
+      const [id] = await connection("RPG_alignment").insert({ name: name });
       // Resposta
       return res.json({
-        query: body,
+        query: name,
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -84,7 +82,7 @@ module.exports = {
       });
       // Resposta
       return res.json({
-        query: body,
+        query: { name: name, dice_life: dice_life },
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -169,10 +167,10 @@ module.exports = {
     // Veriricar se encotrou no banco o usuário
     if (count["count(*)"] > 0) {
       // Inserir no banco os dados
-      const [id] = await connection("RPG_color_eye").insert("name", name);
+      const [id] = await connection("RPG_color_eye").insert({ name: name });
       // Resposta
       return res.json({
-        query: body,
+        query: name,
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -227,10 +225,10 @@ module.exports = {
     // Veriricar se encotrou no banco o usuário
     if (count["count(*)"] > 0) {
       // Inserir no banco os dados
-      const [id] = await connection("RPG_color_hair").insert("name", name);
+      const [id] = await connection("RPG_color_hair").insert({ name: name });
       // Resposta
       return res.json({
-        query: body,
+        query: name,
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -285,10 +283,10 @@ module.exports = {
     // Veriricar se encotrou no banco o usuário
     if (count["count(*)"] > 0) {
       // Inserir no banco os dados
-      const [id] = await connection("RPG_color_skin").insert("name", name);
+      const [id] = await connection("RPG_color_skin").insert({ name: name });
       // Resposta
       return res.json({
-        query: body,
+        query: name,
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -343,10 +341,10 @@ module.exports = {
     // Veriricar se encotrou no banco o usuário
     if (count["count(*)"] > 0) {
       // Inserir no banco os dados
-      const [id] = await connection("RPG_languages").insert("name", name);
+      const [id] = await connection("RPG_languages").insert({ name: name });
       // Resposta
       return res.json({
-        query: body,
+        query: name,
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -396,7 +394,7 @@ module.exports = {
       circle,
       level,
       formulation_time,
-      duration,
+      duraction,
       reach,
       target,
       resistance,
@@ -416,7 +414,7 @@ module.exports = {
         circle: circle,
         level: level,
         formulation_time: formulation_time,
-        duration: duration,
+        duraction: duraction,
         reach: reach,
         target: target,
         resistance: resistance,
@@ -424,7 +422,17 @@ module.exports = {
       });
       // Resposta
       return res.json({
-        query: body,
+        query: {
+          name: name,
+          circle: circle,
+          level: level,
+          formulation_time: formulation_time,
+          duraction: duraction,
+          reach: reach,
+          target: target,
+          resistance: resistance,
+          description: description,
+        },
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -450,15 +458,15 @@ module.exports = {
       // Consulta quantos tem no banco
       const magic = await connection("RPG_magics")
         .select(
-          name,
-          circle,
-          level,
-          formulation_time,
-          duration,
-          reach,
-          target,
-          resistance,
-          description
+          "name",
+          "circle",
+          "level",
+          "formulation_time",
+          "duraction",
+          "reach",
+          "target",
+          "resistance",
+          "description"
         )
         .where("id", id)
         .limit(1);
@@ -488,15 +496,15 @@ module.exports = {
       // Consulta quantos tem no banco
       const magics = await connection("RPG_magics")
         .select(
-          name,
-          circle,
-          level,
-          formulation_time,
-          duration,
-          reach,
-          target,
-          resistance,
-          description
+          "name",
+          "circle",
+          "level",
+          "formulation_time",
+          "duraction",
+          "reach",
+          "target",
+          "resistance",
+          "description"
         )
         .orderBy("name");
       // Resposta
@@ -535,7 +543,10 @@ module.exports = {
       });
       // Resposta
       return res.json({
-        query: body,
+        query: {
+          name: name,
+          initials: initials,
+        },
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -560,7 +571,7 @@ module.exports = {
     if (count["count(*)"] > 0) {
       // Consulta quantos tem no banco
       const magic = await connection("RPG_money")
-        .select(name, initials)
+        .select("name", "initials")
         .where("id", id)
         .limit(1);
       // Resposta
@@ -588,7 +599,7 @@ module.exports = {
     if (count["count(*)"] > 0) {
       // Consulta quantos tem no banco
       const money = await connection("RPG_money")
-        .select(name, initials)
+        .select("name", "initials")
         .orderBy("name");
       // Resposta
       res.header("X-Total-Count", money.length);
@@ -645,7 +656,18 @@ module.exports = {
       });
       // Resposta
       return res.json({
-        query: body,
+        query: {
+          name: name,
+          force_add: force_add,
+          dexterity_add: dexterity_add,
+          constitution_add: constitution_add,
+          intelligence_add: intelligence_add,
+          wisdom_add: wisdom_add,
+          charisma_add: charisma_add,
+          displacement: displacement,
+          min_age: min_age,
+          max_age: max_age,
+        },
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -671,16 +693,16 @@ module.exports = {
       // Consulta quantos tem no banco
       const race = await connection("RPG_races")
         .select(
-          name,
-          force_add,
-          dexterity_add,
-          constitution_add,
-          intelligence_add,
-          wisdom_add,
-          charisma_add,
-          displacement,
-          min_age,
-          max_age
+          "name",
+          "force_add",
+          "dexterity_add",
+          "constitution_add",
+          "intelligence_add",
+          "wisdom_add",
+          "charisma_add",
+          "displacement",
+          "min_age",
+          "max_age"
         )
         .where("id", id)
         .limit(1);
@@ -710,16 +732,16 @@ module.exports = {
       // Consulta quantos tem no banco
       const races = await connection("RPG_races")
         .select(
-          name,
-          force_add,
-          dexterity_add,
-          constitution_add,
-          intelligence_add,
-          wisdom_add,
-          charisma_add,
-          displacement,
-          min_age,
-          max_age
+          "name",
+          "force_add",
+          "dexterity_add",
+          "constitution_add",
+          "intelligence_add",
+          "wisdom_add",
+          "charisma_add",
+          "displacement",
+          "min_age",
+          "max_age"
         )
         .orderBy("name");
       // Resposta
@@ -752,7 +774,10 @@ module.exports = {
       const languages = await connection("RPG_race_languages")
         .select("RPG_languages.name")
         .join("RPG_languages", function () {
-          this.on("RPG_race_languages.id_race", id_races);
+          this.on({
+            "RPG_race_languages.id_race": id_race,
+            "RPG_race_languages.id_language": "RPG_languages.id",
+          });
         })
         .orderBy("name");
       // Resposta
@@ -792,7 +817,11 @@ module.exports = {
       });
       // Resposta
       return res.json({
-        query: body,
+        query: {
+          name: name,
+          height: height,
+          width: width,
+        },
         data: { id: id },
         msg: "SUCCESS",
       });
