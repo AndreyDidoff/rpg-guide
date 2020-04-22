@@ -11,6 +11,7 @@ const routes_guide_language = require("./Routes/routes_guide_languages");
 const routes_guide_magics = require("./Routes/routes_guide_magics");
 const routes_guide_others = require("./Routes/routes_guide_others");
 const routes_guide_shields = require("./Routes/routes_guide_shields");
+const routes_guide_table_history = require("./Routes/routes_guide_table_history");
 const routes_guide_weapons = require("./Routes/routes_guide_weapons");
 const routes_session = require("./Routes/routes_session");
 const routes_table = require("./Routes/routes_table");
@@ -29,6 +30,7 @@ app.use(routes_guide_language); // Routes Languages
 app.use(routes_guide_magics); // Routes Magics
 app.use(routes_guide_others); // Routes Others
 app.use(routes_guide_shields); // Routes Shields
+app.use(routes_guide_table_history); // Routes Table History
 app.use(routes_guide_weapons); // Routes Weapons
 app.use(routes_session); // Routes Session
 app.use(routes_table); // Routes Table
