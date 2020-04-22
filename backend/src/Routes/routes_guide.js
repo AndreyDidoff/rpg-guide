@@ -12,6 +12,9 @@ const routes_guide = express.Router();
 routes_guide.post(
   "/guide",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       id_alignment: Joi.number().required(),
       id_class: Joi.number().required(),

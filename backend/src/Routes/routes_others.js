@@ -12,12 +12,12 @@ const routes_others = express.Router();
 routes_others.post(
   "/alignment",
   celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      name: Joi.string().required(),
-    }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string().required(),
+    }),
   }),
   others.create_alignments
 );
@@ -35,13 +35,13 @@ routes_others.get(
 routes_others.post(
   "/class",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
       dice_life: Joi.number().required(),
     }),
-    [Segments.HEADERS]: Joi.object({
-      authorization: Joi.string().required(),
-    }).unknown(),
   }),
   others.create_class
 );
@@ -72,12 +72,12 @@ routes_others.get(
 routes_others.post(
   "/color_eye",
   celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      name: Joi.string().required(),
-    }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string().required(),
+    }),
   }),
   others.create_color_eye
 );
@@ -95,12 +95,12 @@ routes_others.get(
 routes_others.post(
   "/color_hair",
   celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      name: Joi.string().required(),
-    }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string().required(),
+    }),
   }),
   others.create_color_hair
 );
@@ -118,12 +118,12 @@ routes_others.get(
 routes_others.post(
   "/color_skin",
   celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      name: Joi.string().required(),
-    }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string().required(),
+    }),
   }),
   others.create_color_skin
 );
@@ -141,12 +141,12 @@ routes_others.get(
 routes_others.post(
   "/language",
   celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      name: Joi.string().required(),
-    }),
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string().required(),
+    }),
   }),
   others.create_language
 );
@@ -164,6 +164,9 @@ routes_others.get(
 routes_others.post(
   "/magic",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
       circle: Joi.string().required(),
@@ -175,9 +178,6 @@ routes_others.post(
       resistance: Joi.string().required(),
       description: Joi.string().required(),
     }),
-    [Segments.HEADERS]: Joi.object({
-      authorization: Joi.string().required(),
-    }).unknown(),
   }),
   others.create_magic
 );
@@ -208,13 +208,13 @@ routes_others.get(
 routes_others.post(
   "/money",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
       initials: Joi.string().required().length(2),
     }),
-    [Segments.HEADERS]: Joi.object({
-      authorization: Joi.string().required(),
-    }).unknown(),
   }),
   others.create_money
 );
@@ -245,6 +245,9 @@ routes_others.get(
 routes_others.post(
   "/race",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
       level: Joi.number(),
@@ -258,9 +261,6 @@ routes_others.post(
       min_age: Joi.number(),
       max_age: Joi.number(),
     }),
-    [Segments.HEADERS]: Joi.object({
-      authorization: Joi.string().required(),
-    }).unknown(),
   }),
   others.create_race
 );
@@ -304,14 +304,14 @@ routes_others.get(
 routes_others.post(
   "/size",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().required(),
       height: Joi.number(),
       width: Joi.number(),
     }),
-    [Segments.HEADERS]: Joi.object({
-      authorization: Joi.string().required(),
-    }).unknown(),
   }),
   others.create_size
 );

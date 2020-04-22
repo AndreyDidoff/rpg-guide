@@ -12,6 +12,9 @@ const routes_guide_itens = express.Router();
 routes_guide_itens.post(
   "/item",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       id_guide: Joi.number().required(),
       name: Joi.string().required(),

@@ -12,6 +12,9 @@ const routes_guide_helmos = express.Router();
 routes_guide_helmos.post(
   "/helmos",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       id_guide: Joi.number().required(),
       bonus: Joi.string(),

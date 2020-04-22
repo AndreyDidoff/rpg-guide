@@ -12,6 +12,9 @@ const routes_guide_weapons = express.Router();
 routes_guide_weapons.post(
   "/weapons",
   celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
     [Segments.BODY]: Joi.object().keys({
       id_guide: Joi.number().required(),
       amount_dice_attack: Joi.number(),
