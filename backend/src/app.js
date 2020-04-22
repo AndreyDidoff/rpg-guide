@@ -10,6 +10,7 @@ const routes_guide_itens = require("./Routes/routes_guide_itens");
 const routes_guide_language = require("./Routes/routes_guide_languages");
 const routes_guide_magics = require("./Routes/routes_guide_magics");
 const routes_guide_others = require("./Routes/routes_guide_others");
+const routes_guide_pets = require("./Routes/routes_guide_pets");
 const routes_guide_shields = require("./Routes/routes_guide_shields");
 const routes_guide_table_history = require("./Routes/routes_guide_table_history");
 const routes_guide_table_magic = require("./Routes/routes_guide_table_magic");
@@ -30,6 +31,7 @@ app.use(routes_guide_itens); // Routes Itens
 app.use(routes_guide_language); // Routes Languages
 app.use(routes_guide_magics); // Routes Magics
 app.use(routes_guide_others); // Routes Others
+app.use(routes_guide_pets); // Routes Pets
 app.use(routes_guide_shields); // Routes Shields
 app.use(routes_guide_table_history); // Routes Table History
 app.use(routes_guide_table_magic); // Routes Table Magic
