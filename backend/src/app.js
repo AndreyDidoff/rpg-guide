@@ -7,6 +7,7 @@ const routes_guide = require("./Routes/routes_guide");
 const routes_guide_armor = require("./Routes/routes_guide_armor");
 const routes_guide_helmos = require("./Routes/routes_guide_helmos");
 const routes_guide_itens = require("./Routes/routes_guide_itens");
+const routes_guide_language = require("./Routes/routes_guide_languages");
 const routes_guide_weapons = require("./Routes/routes_guide_weapons");
 const routes_session = require("./Routes/routes_session");
 const routes_table = require("./Routes/routes_table");
@@ -21,6 +22,7 @@ app.use(routes_guide); // Routes Guide
 app.use(routes_guide_armor); // Routes Armor
 app.use(routes_guide_helmos); // Routes Helmos
 app.use(routes_guide_itens); // Routes Itens
+app.use(routes_guide_language); // Routes Languages
 app.use(routes_guide_weapons); // Routes Weapons
 app.use(routes_session); // Routes Session
 app.use(routes_table); // Routes Table
