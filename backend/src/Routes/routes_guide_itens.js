@@ -68,6 +68,9 @@ routes_guide_itens.delete(
     [Segments.PARAMS]: Joi.object().keys({
       id_item: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_guide: Joi.number().required(),
+    }),
   }),
   guide_itens.delete_item
 );

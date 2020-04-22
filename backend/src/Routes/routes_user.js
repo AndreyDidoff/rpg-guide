@@ -34,6 +34,25 @@ routes_user.get(
   }),
   user.select_id
 );
+// Update User
+routes_user.put(
+  "/user/:id_user",
+  celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+    [Segments.PARAMS]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string(),
+      nickname: Joi.string(),
+      passwd: Joi.string().min(8),
+      email: Joi.string().email(),
+    }),
+  }),
+  user.update
+);
 // Delete User
 routes_user.delete(
   "/user/:id",
@@ -47,6 +66,7 @@ routes_user.delete(
   }),
   user.delete
 );
+
 // Create Friend
 routes_user.post(
   "/friend",

@@ -66,6 +66,9 @@ routes_guide_helmos.delete(
     [Segments.PARAMS]: Joi.object().keys({
       id_helmo: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_guide: Joi.number().required(),
+    }),
   }),
   guide_helmos.delete_helmo
 );

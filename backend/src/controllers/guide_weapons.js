@@ -1,5 +1,6 @@
 // Requires
 const connection = require("../database/connect");
+const validators = require("./validators");
 const table_db = "RPG_guide_weapons";
 // Exports
 module.exports = {
@@ -18,193 +19,109 @@ module.exports = {
       dice_critical = null,
       reach = "",
       type = "",
-      main = null,
+      main,
     } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const user = await connection("RPG_users")
-      .select("id")
-      .where("cod", cod_user);
-    // Veriricar se encotrou no banco o usuário
-    if (user.length > 0) {
-      // Consultar guide no banco:
-      const guide = await connection("RPG_guide")
-        .select("id_user")
-        .where("id", id_guide);
-      // Verificar se achou:
-      if (guide.length > 0) {
-        // Verifica se usuário pode adicionar
-        if (user[0].id === guide[0].id_user) {
-          // Consultar se o usuário já tem:
-          const weapons = await connection(table_db)
-            .select("main")
-            .where("id_guide", id_guide)
-            .whereNot("main", 3);
-          if (weapons.length === 0) {
-            // Se não tiver, main tem que ser 1
-            main = main !== 3 ? 1 : main;
-            if (main === 3) {
-              // Consulta quantas ocultas tem
-              const [count_oculta] = await connection(table_db)
-                .where({ id_guide: id_guide, main: 3 })
-                .count();
-              console.log(count_oculta["count(*)"]);
-              // Se já tiver
-              if (count_oculta["count(*)"] > 0) {
-                // Resposta
-                return res.status(400).json({
-                  msg:
-                    "Limite de Armas Atingido. Adcionar a mochila ou excluir uma arma.",
-                });
-              }
-            }
-            // criar insert do banco
-            let insert = {
-              id_guide: id_guide,
-              amount_dice_attack: amount_dice_attack,
-              dice_attack: dice_attack,
-              bonus: bonus,
-              amount_dice_critical: amount_dice_critical,
-              dice_critical: dice_critical,
-              reach: reach,
-              type: type,
-              main: main,
-            };
-            // Inserir no banco os dados
-            const [id] = await connection(table_db).insert(insert);
-            // Resposta
-            return res.json({
-              query: {
-                id_guide: id_guide,
-                amount_dice_attack: amount_dice_attack,
-                dice_attack: dice_attack,
-                bonus: bonus,
-                amount_dice_critical: amount_dice_critical,
-                dice_critical: dice_critical,
-                reach: reach,
-                type: type,
-                main: main,
-              },
-              data: { id: id },
-              msg: "SUCCESS",
-            });
-          } else if (weapons.length < 2) {
-            if (main === 3) {
-              // Consulta quantas ocultas tem
-              const [count_oculta] = await connection(table_db)
-                .where({ id_guide: id_guide, main: 3 })
-                .count();
-              // Se já tiver
-              if (count_oculta["count(*)"] === 1) {
-                // Resposta
-                return res.status(400).json({
-                  msg:
-                    "Limite de Armas Atingido. Adcionar a mochila ou excluir uma arma.",
-                });
-              }
-            }
-            if (main === null) {
-              main = weapons[0].main === 1 ? 0 : 1;
-            } else if (weapons[0].main === main) {
-              main = weapons[0].main > 0 ? 0 : 1;
-            }
-            // criar insert do banco
-            let insert = {
-              id_guide: id_guide,
-              amount_dice_attack: amount_dice_attack,
-              dice_attack: dice_attack,
-              bonus: bonus,
-              amount_dice_critical: amount_dice_critical,
-              dice_critical: dice_critical,
-              reach: reach,
-              type: type,
-              main: main,
-            };
-            // Inserir no banco os dados
-            const [id] = await connection(table_db).insert(insert);
-            // Resposta
-            return res.json({
-              query: {
-                id_guide: id_guide,
-                amount_dice_attack: amount_dice_attack,
-                dice_attack: dice_attack,
-                bonus: bonus,
-                amount_dice_critical: amount_dice_critical,
-                dice_critical: dice_critical,
-                reach: reach,
-                type: type,
-                main: main,
-              },
-              data: { id: id },
-              msg: "SUCCESS",
-            });
-          } else if (weapons.length === 2 && main === 3) {
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se guide existe e pertence ao usuário
+      const res_guide = await validators.valida_guide(
+        id_guide,
+        res_cod_user.id_user
+      );
+      // Verifica se usuário pode adicionar
+      if (res_guide.res) {
+        // criar insert do banco
+        let insert = { id_guide: id_guide };
+        insert["amount_dice_attack"] =
+          amount_dice_attack !== null ? amount_dice_attack : null;
+        insert["bonus"] = bonus !== null ? bonus : null;
+        insert["dice_attack"] = dice_attack !== null ? dice_attack : null;
+        insert["amount_dice_critical"] =
+          amount_dice_critical !== null ? amount_dice_critical : null;
+        insert["dice_critical"] = dice_critical !== null ? dice_critical : null;
+        insert["reach"] = reach !== "" ? reach : "";
+        insert["type"] = type !== "" ? type : "";
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, insert, {
+          main: 3,
+        });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res < 1) {
+          if (main === 3) {
+            let insert_oculto = insert;
+            insert_oculto["main"] = 3;
             // Consulta quantas ocultas tem
-            const [count_oculta] = await connection(table_db)
-              .where({ id_guide: id_guide, main: 3 })
-              .count();
+            const res_count_item_oculto = await validators.conta_itens(
+              table_db,
+              insert_oculto
+            );
             // Se já tiver
-            if (count_oculta["count(*)"] === 1) {
+            if (res_count_item_oculto.res > 0) {
               // Resposta
-              return res.status(400).json({
+              return res.status(res_count_item_oculto.status).json({
                 msg:
-                  "Limite de Armas Atingido. Adcionar a mochila ou excluir uma arma.",
+                  "Limite de itens atingido! Adcione a sua mochila este item.",
               });
             }
-            // criar insert do banco
-            let insert = {
-              id_guide: id_guide,
-              amount_dice_attack: amount_dice_attack,
-              dice_attack: dice_attack,
-              bonus: bonus,
-              amount_dice_critical: amount_dice_critical,
-              dice_critical: dice_critical,
-              reach: reach,
-              type: type,
-              main: main,
-            };
-            // Inserir no banco os dados
-            const [id] = await connection(table_db).insert(insert);
-            // Resposta
-            return res.json({
-              query: {
-                id_guide: id_guide,
-                amount_dice_attack: amount_dice_attack,
-                dice_attack: dice_attack,
-                bonus: bonus,
-                amount_dice_critical: amount_dice_critical,
-                dice_critical: dice_critical,
-                reach: reach,
-                type: type,
-                main: main,
-              },
-              data: { id: id },
-              msg: "SUCCESS",
-            });
           } else {
-            // Resposta
-            return res.status(400).json({
-              msg:
-                "Limite de Armas Atingido. Adcionar a mochila ou excluir uma arma.",
+            // Consulta quantas armas tem com main
+            const res_count_item_main = await validators.conta_itens(table_db, {
+              main: main,
             });
+            // Se não tiver, main tem que ser 1
+            main =
+              res_count_item_main.res > 0
+                ? main === 1
+                  ? 0
+                  : 1
+                : main === 0
+                ? 0
+                : 1;
+            // Consulta quantas armas tem com main
+            const res_count_item_main2 = await validators.conta_itens(
+              table_db,
+              {
+                main: main,
+              }
+            );
+            if (res_count_item_main2.res > 0) {
+              // Resposta
+              return res.status(res_count_item.status).json({
+                msg:
+                  "Limite de itens atingido! Adcione a sua mochila este item.",
+              });
+            }
           }
+          // Insere main no insert original
+          insert["main"] = main;
+          // Inserir no banco os dados
+          const [id] = await connection(table_db).insert(insert);
+          // Resposta
+          return res.json({
+            query: insert,
+            data: { id: id },
+            msg: "SUCCESS",
+          });
         } else {
           // Resposta
-          return res.status(400).json({
-            msg: "Usuário não autorizado",
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
           });
         }
       } else {
         // Resposta
-        return res.status(404).json({
-          msg: "Personagem não encontrado",
+        return res.status(res_guide.status).json({
+          msg: res_guide.msg,
         });
       }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -214,20 +131,23 @@ module.exports = {
     const { id_guide } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const user = await connection("RPG_users")
-      .select("id")
-      .where("cod", cod_user);
-    // Veriricar se encotrou no banco o usuário
-    if (user.length > 0) {
-      // Consultar guide
-      const guide = await connection("RPG_guide")
-        .select("id_user")
-        .where("id", id_guide);
-      // Verificar se achou:
-      if (guide.length > 0) {
-        // Verifica se usuário pode adicionar
-        if (user[0].id === guide[0].id_user) {
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se guide existe e pertence ao usuário
+      const res_guide = await validators.valida_guide(
+        id_guide,
+        res_cod_user.id_user
+      );
+      // Verifica se usuário pode adicionar
+      if (res_guide.res) {
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, {
+          id_guide: id_guide,
+        });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res > 0) {
           // Consulta quantos tem no banco
           const weapons = await connection(table_db)
             .select(
@@ -253,20 +173,20 @@ module.exports = {
           });
         } else {
           // Resposta
-          return res.status(400).json({
-            msg: "Usuário não autorizado",
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
           });
         }
       } else {
         // Resposta
-        return res.status(404).json({
-          msg: "Personagem não encontrado",
+        return res.status(res_guide.status).json({
+          msg: res_guide.msg,
         });
       }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -282,184 +202,109 @@ module.exports = {
       dice_critical = null,
       reach = "",
       type = "",
-      main = 1,
+      main,
     } = request.body;
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_weapons } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const user = await connection("RPG_users")
-      .select("id")
-      .where("cod", cod_user);
-    // Veriricar se encotrou no banco o usuário
-    if (user.length > 0) {
-      // Consultar weapons:
-      const weapons = await connection(table_db)
-        .select(".RPG_guide.id_user", ".RPG_guide.id", table_db + ".main")
-        .join("RPG_guide", function () {
-          this.on({
-            "RPG_guide.id": id_guide,
-          });
-        })
-        .where(table_db + ".id", id_weapons);
-      // Verificar se achou:
-      if (weapons.length > 0) {
-        // Verifica se usuário pode adicionar
-        if (user[0].id === weapons[0].id_user) {
-          // Procura todas as armas
-          const weapons_2 = await connection(table_db)
-            .select("id", "main")
-            .where("id_guide", id_guide);
-          // Verifica quantas armas tem
-          if (weapons_2.length === 1) {
-            // Define Obrigatóriamente main como 1
-            main = 1;
-            // Faz o Update
-            await connection(table_db)
-              .update({
-                amount_dice_attack: amount_dice_attack,
-                dice_attack: dice_attack,
-                bonus: bonus,
-                amount_dice_critical: amount_dice_critical,
-                dice_critical: dice_critical,
-                reach: reach,
-                type: type,
-                main: main,
-              })
-              .where({ id: id_weapons });
-          } else {
-            let id_other = 0;
-            let main_other = 0;
-            // Se tiver mais de uma
-            // Verifica se a primeira que achou não é a que estamos tratando
-            if (weapons_2[0].id !== id_weapons) {
-              id_other = weapons_2[0].id;
-              main_other = weapons_2[0].main;
-            } else {
-              id_other = weapons_2[1].id;
-              main_other = weapons_2[1].main;
-            }
-            if (main === main_other && main === 1) {
-              // Faz o Update da primeira arma
-              await connection(table_db)
-                .update({
-                  amount_dice_attack: amount_dice_attack,
-                  dice_attack: dice_attack,
-                  bonus: bonus,
-                  amount_dice_critical: amount_dice_critical,
-                  dice_critical: dice_critical,
-                  reach: reach,
-                  type: type,
-                  main: 1,
-                })
-                .where({ id: id_weapons });
-              // Faz o Update da segunda arma
-              await connection(table_db)
-                .update({
-                  main: 0,
-                })
-                .where({ id: id_other });
-            } else if (main === main_other && main === 0) {
-              // Faz o Update da primeira arma
-              await connection(table_db)
-                .update({
-                  amount_dice_attack: amount_dice_attack,
-                  dice_attack: dice_attack,
-                  bonus: bonus,
-                  amount_dice_critical: amount_dice_critical,
-                  dice_critical: dice_critical,
-                  reach: reach,
-                  type: type,
-                  main: 0,
-                })
-                .where({ id: id_weapons });
-              // Faz o Update da segunda arma
-              await connection(table_db)
-                .update({
-                  main: 1,
-                })
-                .where({ id: id_other });
-            } else {
-              // Faz o Update
-              await connection(table_db)
-                .update({
-                  amount_dice_attack: amount_dice_attack,
-                  dice_attack: dice_attack,
-                  bonus: bonus,
-                  amount_dice_critical: amount_dice_critical,
-                  dice_critical: dice_critical,
-                  reach: reach,
-                  type: type,
-                  main: main,
-                })
-                .where({ id: id_weapons });
-            }
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se guide existe e pertence ao usuário
+      const res_guide = await validators.valida_guide(
+        id_guide,
+        res_cod_user.id_user
+      );
+      // Verifica se usuário pode adicionar
+      if (res_guide.res) {
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, {
+          id: id_weapons,
+        });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res > 0) {
+          // criar update do banco
+          let update = { id_guide: id_guide, main: main };
+          if (amount_dice_attack !== null) {
+            update["amount_dice_attack"] = amount_dice_attack;
           }
+          if (bonus !== null) {
+            update["bonus"] = bonus;
+          }
+          if (dice_attack !== null) {
+            update["dice_attack"] = dice_attack;
+          }
+          if (amount_dice_critical !== null) {
+            update["amount_dice_critical"] = amount_dice_critical;
+          }
+          if (dice_critical !== null) {
+            update["dice_critical"] = dice_critical;
+          }
+          if (reach !== "") {
+            update["reach"] = reach;
+          }
+          if (type !== "") {
+            update["type"] = type;
+          }
+          // Faz o Update
+          await connection(table_db).update(update).where({ id: id_weapons });
           // Resposta
           return res.json({
-            query: {
-              id_guide: id_guide,
-              amount_dice_attack: amount_dice_attack,
-              dice_attack: dice_attack,
-              bonus: bonus,
-              amount_dice_critical: amount_dice_critical,
-              dice_critical: dice_critical,
-              reach: reach,
-              type: type,
-              main: main,
-            },
+            query: update,
             msg: "SUCCESS",
           });
         } else {
           // Resposta
-          return res.status(400).json({
-            msg: "Usuário não autorizado",
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
           });
         }
       } else {
         // Resposta
-        return res.status(404).json({
-          msg: "Arma não encontrada",
+        return res.status(res_guide.status).json({
+          msg: res_guide.msg,
         });
       }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
   // Delete Weapons
   async delete_weapons(request, res) {
+    // Pega itens do body
+    const { id_guide, main } = request.body;
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_weapons } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const user = await connection("RPG_users")
-      .select("id")
-      .where("cod", cod_user);
-    // Veriricar se encotrou no banco o usuário
-    if (user.length > 0) {
-      // Consultar se o usuário já tem um personagem com o mesmo nome:
-      const weapons = await connection(table_db)
-        .select(".RPG_guide.id_user", ".RPG_guide.id", table_db + ".main")
-        .join("RPG_guide", function () {
-          this.on({
-            "RPG_guide_weapons.id": id_weapons,
-          });
-        })
-        .where(table_db + ".id", id_weapons);
-      // Verificar se achou:
-      if (weapons.length > 0) {
-        // Verifica se usuário pode adicionar weaponss
-        if (user[0].id === weapons[0].id_user) {
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se guide existe e pertence ao usuário
+      const res_guide = await validators.valida_guide(
+        id_guide,
+        res_cod_user.id_user
+      );
+      // Verifica se usuário pode adicionar
+      if (res_guide.res) {
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, {
+          id: id_weapons,
+          main: main,
+        });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res > 0) {
           await connection(table_db).where("id", id_weapons).delete();
-          if (weapons[0].main === 1) {
+          if (main === 1) {
             await connection(table_db)
               .update({ main: 1 })
-              .where({ id_guide: weapons[0].id, main: 0 });
+              .where({ id_guide: id_guide, main: 0 });
           }
           // Resposta
           return res.json({
@@ -467,20 +312,20 @@ module.exports = {
           });
         } else {
           // Resposta
-          return res.status(400).json({
-            msg: "Usuário não autorizado",
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
           });
         }
       } else {
         // Resposta
-        return res.status(404).json({
-          msg: "Arma não encontrada",
+        return res.status(res_guide.status).json({
+          msg: res_guide.msg,
         });
       }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },

@@ -47,6 +47,37 @@ routes_table.get(
   }),
   table.select_all_tables
 );
+// Update Table
+routes_table.put(
+  "/table/:id_table",
+  celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+    [Segments.PARAMS]: Joi.object().keys({
+      id_table: Joi.number().required(),
+    }),
+    [Segments.BODY]: Joi.object().keys({
+      name: Joi.string(),
+      description: Joi.string(),
+      resume: Joi.string(),
+    }),
+  }),
+  table.update_table
+);
+// Delete Table
+routes_table.put(
+  "/table/:id_table",
+  celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+    [Segments.PARAMS]: Joi.object().keys({
+      id_table: Joi.number().required(),
+    }),
+  }),
+  table.delete_table
+);
 
 // Create Cross User Table
 routes_table.post(
@@ -89,10 +120,20 @@ routes_table.get(
   }),
   table.select_cross_table_users
 );
-
-// Delete table
-
-// Mod table
+// Delete Cross  User Table
+routes_table.put(
+  "/user/:id_user/table/:id_table",
+  celebrate({
+    [Segments.HEADERS]: Joi.object({
+      authorization: Joi.string().required(),
+    }).unknown(),
+    [Segments.PARAMS]: Joi.object().keys({
+      id_user: Joi.number().required(),
+      id_table: Joi.number().required(),
+    }),
+  }),
+  table.delete_cross_user_table
+);
 
 // Export routes_table
 module.exports = routes_table;

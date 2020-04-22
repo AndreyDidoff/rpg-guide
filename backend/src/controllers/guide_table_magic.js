@@ -72,17 +72,30 @@ module.exports = {
       );
       // Verifica se usuário pode adicionar
       if (res_guide.res) {
-        // Consulta quantos tem no banco
-        const table_magics = await connection(table_db)
-          .select("id", "id_guide", "id_table", "id_magic")
-          .where({ id_guide: id_guide, id_table: id_table });
-        // Resposta
-        res.header("X-Total-Count", table_magics.length);
-        return res.json({
-          rows: table_magics.length,
-          data: table_magics,
-          msg: "SUCCESS",
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, {
+          id_guide: id_guide,
+          id_table: id_table,
         });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res > 0) {
+          // Consulta quantos tem no banco
+          const table_magics = await connection(table_db)
+            .select("id", "id_guide", "id_table", "id_magic")
+            .where({ id_guide: id_guide, id_table: id_table });
+          // Resposta
+          res.header("X-Total-Count", table_magics.length);
+          return res.json({
+            rows: table_magics.length,
+            data: table_magics,
+            msg: "SUCCESS",
+          });
+        } else {
+          // Resposta
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
+          });
+        }
       } else {
         // Resposta
         return res.status(res_guide.status).json({
@@ -113,13 +126,27 @@ module.exports = {
       );
       // Verifica se usuário pode adicionar
       if (res_guide.res) {
-        await connection(table_db)
-          .where({ id_guide: id_guide, id_table: id_table })
-          .delete();
-        // Resposta
-        return res.json({
-          msg: "SUCCESS",
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, {
+          id_guide: id_guide,
+          id_table: id_table,
         });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res > 0) {
+          // Deleta do banco
+          await connection(table_db)
+            .where({ id_guide: id_guide, id_table: id_table })
+            .delete();
+          // Resposta
+          return res.json({
+            msg: "SUCCESS",
+          });
+        } else {
+          // Resposta
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
+          });
+        }
       } else {
         // Resposta
         return res.status(res_guide.status).json({

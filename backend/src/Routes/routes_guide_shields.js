@@ -20,7 +20,6 @@ routes_guide_shields.post(
       bonus: Joi.string(),
       extra_bonus: Joi.string(),
       property_especial: Joi.string(),
-      main: Joi.number(),
     }),
   }),
   guide_shields.create
@@ -53,7 +52,6 @@ routes_guide_shields.put(
       bonus: Joi.string(),
       extra_bonus: Joi.string(),
       property_especial: Joi.string(),
-      main: Joi.number(),
     }),
   }),
   guide_shields.update_shield
@@ -67,6 +65,9 @@ routes_guide_shields.delete(
     }).unknown(),
     [Segments.PARAMS]: Joi.object().keys({
       id_shield: Joi.number().required(),
+    }),
+    [Segments.BODY]: Joi.object().keys({
+      id_guide: Joi.number().required(),
     }),
   }),
   guide_shields.delete_shield

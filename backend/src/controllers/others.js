@@ -1,5 +1,6 @@
 // Requires
 const connection = require("../database/connect");
+const validators = require("./validators");
 // Exports
 module.exports = {
   /*
@@ -11,24 +12,34 @@ module.exports = {
     const { name } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_alignment").insert({ name: name });
-      // Resposta
-      return res.json({
-        query: name,
-        data: { id: id },
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_alignment", {
+        name: name,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_alignment").insert({ name: name });
+        // Resposta
+        return res.json({
+          query: name,
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -36,27 +47,35 @@ module.exports = {
   async select_all_alignments(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const alignments = await connection("RPG_alignment")
-        .select("name")
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", alignments.length);
-      return res.json({
-        rows: alignments.length,
-        data: alignments,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_alignment");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const alignments = await connection("RPG_alignment")
+          .select("name")
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", alignments.length);
+        return res.json({
+          rows: alignments.length,
+          data: alignments,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -69,27 +88,38 @@ module.exports = {
     const { name, dice_life } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_classes").insert({
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_classes", {
         name: name,
         dice_life: dice_life,
       });
-      // Resposta
-      return res.json({
-        query: { name: name, dice_life: dice_life },
-        data: { id: id },
-        msg: "SUCCESS",
-      });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_classes").insert({
+          name: name,
+          dice_life: dice_life,
+        });
+        // Resposta
+        return res.json({
+          query: { name: name, dice_life: dice_life },
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -99,27 +129,37 @@ module.exports = {
     const { id } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const class_db = await connection("RPG_classes")
-        .select("name", "dice_life")
-        .where("id", id)
-        .limit(1);
-      // Resposta
-      res.header("X-Total-Count", class_db.length);
-      return res.json({
-        data: class_db,
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_classes", {
+        id: id,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const class_db = await connection("RPG_classes")
+          .select("name", "dice_life")
+          .where("id", id)
+          .limit(1);
+        // Resposta
+        res.header("X-Total-Count", class_db.length);
+        return res.json({
+          data: class_db,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -127,27 +167,35 @@ module.exports = {
   async select_all_classes(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const classes = await connection("RPG_classes")
-        .select("name", "dice_life")
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", classes.length);
-      return res.json({
-        rows: classes.length,
-        data: classes,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_classes");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const classes = await connection("RPG_classes")
+          .select("name", "dice_life")
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", classes.length);
+        return res.json({
+          rows: classes.length,
+          data: classes,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -160,24 +208,34 @@ module.exports = {
     const { name } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_color_eye").insert({ name: name });
-      // Resposta
-      return res.json({
-        query: name,
-        data: { id: id },
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_color_eye", {
+        name: name,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_color_eye").insert({ name: name });
+        // Resposta
+        return res.json({
+          query: name,
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -185,27 +243,35 @@ module.exports = {
   async select_all_color_eye(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const colors_eye = await connection("RPG_color_eye")
-        .select("name")
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", colors_eye.length);
-      return res.json({
-        rows: colors_eye.length,
-        data: colors_eye,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_color_eye");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const colors_eye = await connection("RPG_color_eye")
+          .select("name")
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", colors_eye.length);
+        return res.json({
+          rows: colors_eye.length,
+          data: colors_eye,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -218,24 +284,34 @@ module.exports = {
     const { name } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_color_hair").insert({ name: name });
-      // Resposta
-      return res.json({
-        query: name,
-        data: { id: id },
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_color_hair", {
+        name: name,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_color_hair").insert({ name: name });
+        // Resposta
+        return res.json({
+          query: name,
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -243,27 +319,35 @@ module.exports = {
   async select_all_color_hair(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const colors_hair = await connection("RPG_color_hair")
-        .select("name")
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", colors_hair.length);
-      return res.json({
-        rows: colors_hair.length,
-        data: colors_hair,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_color_hair");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const colors_hair = await connection("RPG_color_hair")
+          .select("name")
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", colors_hair.length);
+        return res.json({
+          rows: colors_hair.length,
+          data: colors_hair,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -276,24 +360,34 @@ module.exports = {
     const { name } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_color_skin").insert({ name: name });
-      // Resposta
-      return res.json({
-        query: name,
-        data: { id: id },
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_color_skin", {
+        name: name,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_color_skin").insert({ name: name });
+        // Resposta
+        return res.json({
+          query: name,
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -301,27 +395,35 @@ module.exports = {
   async select_all_color_skin(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const colors_skin = await connection("RPG_color_skin")
-        .select("name")
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", colors_skin.length);
-      return res.json({
-        rows: colors_skin.length,
-        data: colors_skin,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_color_skin");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const colors_skin = await connection("RPG_color_skin")
+          .select("name")
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", colors_skin.length);
+        return res.json({
+          rows: colors_skin.length,
+          data: colors_skin,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -334,24 +436,34 @@ module.exports = {
     const { name } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_languages").insert({ name: name });
-      // Resposta
-      return res.json({
-        query: name,
-        data: { id: id },
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_languages", {
+        name: name,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_languages").insert({ name: name });
+        // Resposta
+        return res.json({
+          query: name,
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -359,27 +471,35 @@ module.exports = {
   async select_all_languages(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const languages = await connection("RPG_languages")
-        .select("name")
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", languages.length);
-      return res.json({
-        rows: languages.length,
-        data: languages,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_languages");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const languages = await connection("RPG_languages")
+          .select("name")
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", languages.length);
+        return res.json({
+          rows: languages.length,
+          data: languages,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -402,27 +522,18 @@ module.exports = {
     } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_magics").insert({
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_magics", {
         name: name,
-        circle: circle,
-        level: level,
-        formulation_time: formulation_time,
-        duraction: duraction,
-        reach: reach,
-        target: target,
-        resistance: resistance,
-        description: description,
       });
-      // Resposta
-      return res.json({
-        query: {
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_magics").insert({
           name: name,
           circle: circle,
           level: level,
@@ -432,14 +543,33 @@ module.exports = {
           target: target,
           resistance: resistance,
           description: description,
-        },
-        data: { id: id },
-        msg: "SUCCESS",
-      });
+        });
+        // Resposta
+        return res.json({
+          query: {
+            name: name,
+            circle: circle,
+            level: level,
+            formulation_time: formulation_time,
+            duraction: duraction,
+            reach: reach,
+            target: target,
+            resistance: resistance,
+            description: description,
+          },
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -449,37 +579,47 @@ module.exports = {
     const { id } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const magic = await connection("RPG_magics")
-        .select(
-          "name",
-          "circle",
-          "level",
-          "formulation_time",
-          "duraction",
-          "reach",
-          "target",
-          "resistance",
-          "description"
-        )
-        .where("id", id)
-        .limit(1);
-      // Resposta
-      res.header("X-Total-Count", magic.length);
-      return res.json({
-        data: magic,
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_magics", {
+        id: id,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const magic = await connection("RPG_magics")
+          .select(
+            "name",
+            "circle",
+            "level",
+            "formulation_time",
+            "duraction",
+            "reach",
+            "target",
+            "resistance",
+            "description"
+          )
+          .where("id", id)
+          .limit(1);
+        // Resposta
+        res.header("X-Total-Count", magic.length);
+        return res.json({
+          data: magic,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -487,37 +627,45 @@ module.exports = {
   async select_all_magics(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const magics = await connection("RPG_magics")
-        .select(
-          "name",
-          "circle",
-          "level",
-          "formulation_time",
-          "duraction",
-          "reach",
-          "target",
-          "resistance",
-          "description"
-        )
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", magics.length);
-      return res.json({
-        rows: magics.length,
-        data: magics,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_magics");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const magics = await connection("RPG_magics")
+          .select(
+            "name",
+            "circle",
+            "level",
+            "formulation_time",
+            "duraction",
+            "reach",
+            "target",
+            "resistance",
+            "description"
+          )
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", magics.length);
+        return res.json({
+          rows: magics.length,
+          data: magics,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -530,30 +678,41 @@ module.exports = {
     const { name, initials } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_money").insert({
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_money", {
         name: name,
         initials: initials,
       });
-      // Resposta
-      return res.json({
-        query: {
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_money").insert({
           name: name,
           initials: initials,
-        },
-        data: { id: id },
-        msg: "SUCCESS",
-      });
+        });
+        // Resposta
+        return res.json({
+          query: {
+            name: name,
+            initials: initials,
+          },
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -563,27 +722,37 @@ module.exports = {
     const { id } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const magic = await connection("RPG_money")
-        .select("name", "initials")
-        .where("id", id)
-        .limit(1);
-      // Resposta
-      res.header("X-Total-Count", magic.length);
-      return res.json({
-        data: magic,
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_money", {
+        id: id,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const magic = await connection("RPG_money")
+          .select("name", "initials")
+          .where("id", id)
+          .limit(1);
+        // Resposta
+        res.header("X-Total-Count", magic.length);
+        return res.json({
+          data: magic,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -591,27 +760,35 @@ module.exports = {
   async select_all_money(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const money = await connection("RPG_money")
-        .select("name", "initials")
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", money.length);
-      return res.json({
-        rows: money.length,
-        data: money,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_money");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const money = await connection("RPG_money")
+          .select("name", "initials")
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", money.length);
+        return res.json({
+          rows: money.length,
+          data: money,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -635,28 +812,18 @@ module.exports = {
     } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_races").insert({
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_races", {
         name: name,
-        force_add: force_add,
-        dexterity_add: dexterity_add,
-        constitution_add: constitution_add,
-        intelligence_add: intelligence_add,
-        wisdom_add: wisdom_add,
-        charisma_add: charisma_add,
-        displacement: displacement,
-        min_age: min_age,
-        max_age: max_age,
       });
-      // Resposta
-      return res.json({
-        query: {
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_races").insert({
           name: name,
           force_add: force_add,
           dexterity_add: dexterity_add,
@@ -667,14 +834,34 @@ module.exports = {
           displacement: displacement,
           min_age: min_age,
           max_age: max_age,
-        },
-        data: { id: id },
-        msg: "SUCCESS",
-      });
+        });
+        // Resposta
+        return res.json({
+          query: {
+            name: name,
+            force_add: force_add,
+            dexterity_add: dexterity_add,
+            constitution_add: constitution_add,
+            intelligence_add: intelligence_add,
+            wisdom_add: wisdom_add,
+            charisma_add: charisma_add,
+            displacement: displacement,
+            min_age: min_age,
+            max_age: max_age,
+          },
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -684,38 +871,48 @@ module.exports = {
     const { id } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const race = await connection("RPG_races")
-        .select(
-          "name",
-          "force_add",
-          "dexterity_add",
-          "constitution_add",
-          "intelligence_add",
-          "wisdom_add",
-          "charisma_add",
-          "displacement",
-          "min_age",
-          "max_age"
-        )
-        .where("id", id)
-        .limit(1);
-      // Resposta
-      res.header("X-Total-Count", race.length);
-      return res.json({
-        data: race,
-        msg: "SUCCESS",
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_races", {
+        id: id,
       });
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const race = await connection("RPG_races")
+          .select(
+            "name",
+            "force_add",
+            "dexterity_add",
+            "constitution_add",
+            "intelligence_add",
+            "wisdom_add",
+            "charisma_add",
+            "displacement",
+            "min_age",
+            "max_age"
+          )
+          .where("id", id)
+          .limit(1);
+        // Resposta
+        res.header("X-Total-Count", race.length);
+        return res.json({
+          data: race,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -723,38 +920,46 @@ module.exports = {
   async select_all_races(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const races = await connection("RPG_races")
-        .select(
-          "name",
-          "force_add",
-          "dexterity_add",
-          "constitution_add",
-          "intelligence_add",
-          "wisdom_add",
-          "charisma_add",
-          "displacement",
-          "min_age",
-          "max_age"
-        )
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", races.length);
-      return res.json({
-        rows: races.length,
-        data: races,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_races");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const races = await connection("RPG_races")
+          .select(
+            "name",
+            "force_add",
+            "dexterity_add",
+            "constitution_add",
+            "intelligence_add",
+            "wisdom_add",
+            "charisma_add",
+            "displacement",
+            "min_age",
+            "max_age"
+          )
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", races.length);
+        return res.json({
+          rows: races.length,
+          data: races,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -764,33 +969,46 @@ module.exports = {
     const { id_race } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const languages = await connection("RPG_race_languages")
-        .select("RPG_languages.name")
-        .join("RPG_languages", function () {
-          this.on({
-            "RPG_race_languages.id_race": id_race,
-            "RPG_race_languages.id_language": "RPG_languages.id",
-          });
-        })
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", languages.length);
-      return res.json({
-        rows: languages.length,
-        data: languages,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens(
+        "RPG_race_languages",
+        {
+          id_race: id_race,
+        }
+      );
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const languages = await connection("RPG_race_languages")
+          .select("RPG_languages.name")
+          .join("RPG_languages", function () {
+            this.on({
+              "RPG_race_languages.id_race": id_race,
+              "RPG_race_languages.id_language": "RPG_languages.id",
+            });
+          })
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", languages.length);
+        return res.json({
+          rows: languages.length,
+          data: languages,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -803,32 +1021,42 @@ module.exports = {
     const { name, height = 0, width = 0 } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Inserir no banco os dados
-      const [id] = await connection("RPG_size").insert({
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_size", {
         name: name,
-        height: height,
-        width: width,
       });
-      // Resposta
-      return res.json({
-        query: {
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res < 1) {
+        // Inserir no banco os dados
+        const [id] = await connection("RPG_size").insert({
           name: name,
           height: height,
           width: width,
-        },
-        data: { id: id },
-        msg: "SUCCESS",
-      });
+        });
+        // Resposta
+        return res.json({
+          query: {
+            name: name,
+            height: height,
+            width: width,
+          },
+          data: { id: id },
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -836,27 +1064,35 @@ module.exports = {
   async select_all_sizes(request, res) {
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const [count] = await connection("RPG_users")
-      .where("cod", cod_user)
-      .count();
-    // Veriricar se encotrou no banco o usuário
-    if (count["count(*)"] > 0) {
-      // Consulta quantos tem no banco
-      const sizes = await connection("RPG_size")
-        .select("name", "height", "width")
-        .orderBy("name");
-      // Resposta
-      res.header("X-Total-Count", sizes.length);
-      return res.json({
-        rows: sizes.length,
-        data: sizes,
-        msg: "SUCCESS",
-      });
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se encntra o item
+      const res_count_item = await validators.conta_itens("RPG_size");
+      // Verifica se encontrou itens e seu limite
+      if (res_count_item.res > 0) {
+        // Consulta quantos tem no banco
+        const sizes = await connection("RPG_size")
+          .select("name", "height", "width")
+          .orderBy("name");
+        // Resposta
+        res.header("X-Total-Count", sizes.length);
+        return res.json({
+          rows: sizes.length,
+          data: sizes,
+          msg: "SUCCESS",
+        });
+      } else {
+        // Resposta
+        return res.status(res_count_item.status).json({
+          msg: res_count_item.msg,
+        });
+      }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },

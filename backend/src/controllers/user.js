@@ -1,6 +1,7 @@
 // Requires
 const bcrypt = require("bcryptjs");
 const connection = require("../database/connect");
+const validators = require("./validators");
 let table_db = "RPG_users";
 // Exports
 module.exports = {
@@ -22,7 +23,6 @@ module.exports = {
     if (count_user["count(*)"] > 0) {
       // Resposta
       return res.status(406).json({
-        query: { name, nickname, passwd, email },
         msg: "Usuário ou e-mail já cadastrado!",
       });
     } else {
@@ -62,12 +62,6 @@ module.exports = {
       const [id] = await connection(table_db).insert(insert);
       // Resposta
       return res.json({
-        query: {
-          name: name,
-          nickname: nickname,
-          passwd: passwd_hash,
-          email: email,
-        },
         data: { id: id },
         msg: "SUCCESS",
       });
@@ -106,6 +100,49 @@ module.exports = {
       });
     }
   },
+  // Update User
+  async update(request, res) {
+    // Pega todos os paramentros do body e colocar na variavel
+    const { name = "", nickname = "", passwd = "", email = "" } = request.body;
+    // Pega todos os paramentros da rota e colocar na variavel
+    const { id_user } = request.params;
+    // Procura no banco se usuário já existe
+    const [count_user] = await connection(table_db)
+      .where("id", id_user)
+      .count();
+    // Verifica se encontrou resultados
+    if (count_user["count(*)"] < 1) {
+      // Resposta
+      return res.status(404).json({
+        msg: "Usuário não cadastrado!",
+      });
+    } else {
+      // Cria variavel insert
+      let update = { id: id_user };
+      if (passwd !== "") {
+        // Configurando senha
+        const salt = bcrypt.genSaltSync(10);
+        const passwd_hash = bcrypt.hashSync(passwd, salt);
+        update["passwd"] = passwd_hash;
+      }
+      if (name !== "") {
+        update["name"] = name;
+      }
+      if (nickname !== "") {
+        update["nickname"] = nickname;
+      }
+      if (email !== "") {
+        update["email"] = email;
+      }
+      // Insere no banco
+      await connection(table_db).update(update);
+      // Resposta
+      return res.json({
+        data: { id: id_user },
+        msg: "SUCCESS",
+      });
+    }
+  },
   // Delete User
   async delete(request, res) {
     // Pega todos os paramentros da rota e colocar na variavel
@@ -131,6 +168,7 @@ module.exports = {
       msg: "SUCCESS",
     });
   },
+
   // Create Friend
   async create_friend(request, res) {
     // Pega todos os paramentros do body e colocar na variavel

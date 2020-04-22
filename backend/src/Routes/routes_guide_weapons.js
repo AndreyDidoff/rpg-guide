@@ -24,7 +24,7 @@ routes_guide_weapons.post(
       dice_critical: Joi.number(),
       reach: Joi.string(),
       type: Joi.string(),
-      main: Joi.number(),
+      main: Joi.number().required(),
     }),
   }),
   guide_weapons.create
@@ -75,6 +75,10 @@ routes_guide_weapons.delete(
     }).unknown(),
     [Segments.PARAMS]: Joi.object().keys({
       id_weapons: Joi.number().required(),
+    }),
+    [Segments.BODY]: Joi.object().keys({
+      id_guide: Joi.number().required(),
+      main: Joi.number().required(),
     }),
   }),
   guide_weapons.delete_weapons

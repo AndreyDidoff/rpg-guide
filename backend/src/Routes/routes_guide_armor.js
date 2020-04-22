@@ -66,6 +66,9 @@ routes_guide_armor.delete(
     [Segments.PARAMS]: Joi.object().keys({
       id_armor: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_guide: Joi.number().required(),
+    }),
   }),
   guide_armor.delete_armor
 );

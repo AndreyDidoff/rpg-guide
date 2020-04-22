@@ -66,6 +66,9 @@ routes_guide_others.delete(
     [Segments.PARAMS]: Joi.object().keys({
       id_other: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_guide: Joi.number().required(),
+    }),
   }),
   guide_others.delete_other
 );

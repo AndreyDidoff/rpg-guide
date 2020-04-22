@@ -1,5 +1,6 @@
 // Requires
 const connection = require("../database/connect");
+const validators = require("./validators");
 const table_db = "RPG_guide_table_history";
 // Exports
 module.exports = {
@@ -12,27 +13,28 @@ module.exports = {
     let { id_guide, id_table, history_text, datetime } = request.body;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const user = await connection("RPG_users")
-      .select("id")
-      .where("cod", cod_user);
-    // Veriricar se encotrou no banco o usuário
-    if (user.length > 0) {
-      // Consultar a guide:
-      const guide = await connection("RPG_guide")
-        .select("id_user")
-        .where("id", id_guide);
-      // Verificar se achou:
-      if (guide.length > 0) {
-        // Verifica se usuário pode adicionar
-        if (user[0].id === guide[0].id_user) {
-          // criar insert do banco
-          let insert = {
-            id_guide: id_guide,
-            id_table: id_table,
-            history_text: history_text,
-            datetime: datetime,
-          };
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se guide existe e pertence ao usuário
+      const res_guide = await validators.valida_guide(
+        id_guide,
+        res_cod_user.id_user
+      );
+      // Verifica se usuário pode adicionar
+      if (res_guide.res) {
+        // criar insert do banco
+        let insert = {
+          id_guide: id_guide,
+          id_table: id_table,
+          history_text: history_text,
+          datetime: datetime,
+        };
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, insert);
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res < 1) {
           // Inserir no banco os dados
           const [id] = await connection(table_db).insert(insert);
           // Resposta
@@ -48,20 +50,20 @@ module.exports = {
           });
         } else {
           // Resposta
-          return res.status(400).json({
-            msg: "Usuário não autorizado",
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
           });
         }
       } else {
         // Resposta
-        return res.status(404).json({
-          msg: "Personagem não encontrado",
+        return res.status(res_guide.status).json({
+          msg: res_guide.msg,
         });
       }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -73,20 +75,23 @@ module.exports = {
     const { id_table } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const user = await connection("RPG_users")
-      .select("id")
-      .where("cod", cod_user);
-    // Veriricar se encotrou no banco o usuário
-    if (user.length > 0) {
-      // Consultar se o usuário já tem um personagem com o mesmo nome:
-      const guide = await connection("RPG_guide")
-        .select("id_user")
-        .where("id", id_guide);
-      // Verificar se achou:
-      if (guide.length > 0) {
-        // Verifica se usuário pode adicionar historys
-        if (user[0].id === guide[0].id_user) {
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se guide existe e pertence ao usuário
+      const res_guide = await validators.valida_guide(
+        id_guide,
+        res_cod_user.id_user
+      );
+      // Verifica se usuário pode adicionar
+      if (res_guide.res) {
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, {
+          id_guide: id_guide,
+        });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res > 0) {
           // Consulta quantos tem no banco
           const historys = await connection(table_db)
             .select("id", "id_guide", "id_table", "history_text", "datetime")
@@ -100,20 +105,20 @@ module.exports = {
           });
         } else {
           // Resposta
-          return res.status(400).json({
-            msg: "Usuário não autorizado",
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
           });
         }
       } else {
         // Resposta
-        return res.status(404).json({
-          msg: "Personagem não encontrado",
+        return res.status(res_guide.status).json({
+          msg: res_guide.msg,
         });
       }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -125,25 +130,23 @@ module.exports = {
     const { id_table_history } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const user = await connection("RPG_users")
-      .select("id")
-      .where("cod", cod_user);
-    // Veriricar se encotrou no banco o usuário
-    if (user.length > 0) {
-      // Consultar se o usuário já tem um personagem com o mesmo nome:
-      const magic = await connection(table_db)
-        .select(".RPG_guide.id_user", ".RPG_guide.id")
-        .join("RPG_guide", function () {
-          this.on({
-            "RPG_guide.id": id_guide,
-          });
-        })
-        .where(table_db + ".id", id_table_history);
-      // Verificar se achou:
-      if (magic.length > 0) {
-        // Verifica se usuário pode adicionar magics
-        if (user[0].id === magic[0].id_user) {
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se guide existe e pertence ao usuário
+      const res_guide = await validators.valida_guide(
+        id_guide,
+        res_cod_user.id_user
+      );
+      // Verifica se usuário pode adicionar
+      if (res_guide.res) {
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, {
+          id: id_table_history,
+        });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res > 0) {
           // Faz o Update
           await connection(table_db)
             .update({
@@ -163,20 +166,20 @@ module.exports = {
           });
         } else {
           // Resposta
-          return res.status(400).json({
-            msg: "Usuário não autorizado",
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
           });
         }
       } else {
         // Resposta
-        return res.status(404).json({
-          msg: "Mágica não encontrada",
+        return res.status(res_guide.status).json({
+          msg: res_guide.msg,
         });
       }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
@@ -188,25 +191,23 @@ module.exports = {
     const { id_table_history } = request.params;
     // Pega parametros do Headers para variavel
     const cod_user = request.headers.authorization;
-    // Consulta quantos tem no banco
-    const user = await connection("RPG_users")
-      .select("id")
-      .where("cod", cod_user);
-    // Veriricar se encotrou no banco o usuário
-    if (user.length > 0) {
-      // Consultar se o usuário já tem um personagem com o mesmo nome:
-      const armor = await connection(table_db)
-        .select(".RPG_guide.id_user", "RPG_guide.id")
-        .join("RPG_guide", function () {
-          this.on({
-            "RPG_guide_table_history.id_guide": "RPG_guide.id",
-          });
-        })
-        .where(table_db + ".id", id_table_history);
-      // Verificar se achou:
-      if (armor.length > 0) {
-        // Verifica se usuário pode adicionar historys
-        if (user[0].id === armor[0].id_user) {
+    // Valida cod_user
+    const res_cod_user = await validators.valida_cod(cod_user);
+    // Verifica se encontrou usuário
+    if (res_cod_user.res) {
+      // Valida se guide existe e pertence ao usuário
+      const res_guide = await validators.valida_guide(
+        id_guide,
+        res_cod_user.id_user
+      );
+      // Verifica se usuário pode adicionar
+      if (res_guide.res) {
+        // Valida se encntra o item
+        const res_count_item = await validators.conta_itens(table_db, {
+          id: id_table_history,
+        });
+        // Verifica se encontrou itens e seu limite
+        if (res_count_item.res > 0) {
           await connection(table_db).where("id", id_table_history).delete();
           // Resposta
           return res.json({
@@ -214,20 +215,20 @@ module.exports = {
           });
         } else {
           // Resposta
-          return res.status(400).json({
-            msg: "Usuário não autorizado",
+          return res.status(res_count_item.status).json({
+            msg: res_count_item.msg,
           });
         }
       } else {
         // Resposta
-        return res.status(404).json({
-          msg: "Personagem não encontrado",
+        return res.status(res_guide.status).json({
+          msg: res_guide.msg,
         });
       }
     } else {
       // Resposta
-      return res.status(400).json({
-        msg: "Usuário não autorizado",
+      return res.status(res_cod_user.status).json({
+        msg: res_cod_user.msg,
       });
     }
   },
