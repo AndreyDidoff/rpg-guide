@@ -14,6 +14,7 @@ const routes_guide_pets = require("./Routes/routes_guide_pets");
 const routes_guide_shields = require("./Routes/routes_guide_shields");
 const routes_guide_table_history = require("./Routes/routes_guide_table_history");
 const routes_guide_table_magic = require("./Routes/routes_guide_table_magic");
+const routes_guide_talents = require("./Routes/routes_guide_talents");
 const routes_guide_weapons = require("./Routes/routes_guide_weapons");
 const routes_session = require("./Routes/routes_session");
 const routes_table = require("./Routes/routes_table");
@@ -35,6 +36,7 @@ app.use(routes_guide_pets); // Routes Pets
 app.use(routes_guide_shields); // Routes Shields
 app.use(routes_guide_table_history); // Routes Table History
 app.use(routes_guide_table_magic); // Routes Table Magic
+app.use(routes_guide_talents); // Routes Talents
 app.use(routes_guide_weapons); // Routes Weapons
 app.use(routes_session); // Routes Session
 app.use(routes_table); // Routes Table
