@@ -22,11 +22,33 @@ module.exports = {
       });
       // Verifica se encontrou itens e seu limite
       if (res_count_item.res < 1) {
+        let cod = "";
+        while (cod === "") {
+          // Gera um código de 20 caracteres aleatórios
+          let cod_hash = Array(20)
+            .fill(
+              "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+            )
+            .map(function (x) {
+              return x[Math.floor(Math.random() * x.length)];
+            })
+            .join("");
+          // Consulta quantos tem no banco
+          const [count_cod] = await connection(table_db)
+            .where("cod", cod_hash)
+            .count();
+          // Verifica se encontrou resultados
+          if (count_cod["count(*)"] == 0) {
+            // Se não tiver resultados
+            cod = cod_hash;
+          }
+        }
         // criar insert do banco
         let insert = {
           name: name,
           description: description,
           resume: resume,
+          cod: cod,
         };
         // Inserir no banco os dados da guide nova
         const [id] = await connection("RPG_tables").insert(insert);
@@ -79,7 +101,7 @@ module.exports = {
       if (res_count_item.res > 0) {
         // Consulta quantos tem no banco
         const tables = await connection("RPG_tables")
-          .select("name", "description", "resume")
+          .select("id", "name", "description", "resume", "cod")
           .where("id", id)
           .limit(1);
         // Resposta
@@ -117,7 +139,7 @@ module.exports = {
       if (res_count_item.res > 0) {
         // Consulta quantos tem no banco
         const tables = await connection("RPG_tables")
-          .select("name", "description", "resume")
+          .select("id", "name", "description", "resume", "cod")
           .orderBy("name");
         // Resposta
         res.header("X-Total-Count", tables.length);
