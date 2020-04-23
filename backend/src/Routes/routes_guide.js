@@ -77,6 +77,7 @@ routes_guide.put(
       id_color_skin: Joi.number(),
       id_race: Joi.number(),
       id_size: Joi.number(),
+      id_user: Joi.number().required(),
       age: Joi.number(),
       charisma: Joi.number(),
       constitution: Joi.number(),
@@ -107,6 +108,7 @@ routes_guide.delete(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.PARAMS]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
     }),
   }),

@@ -16,6 +16,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
     }),
   }),
@@ -28,6 +29,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_alignments
 );
@@ -39,6 +43,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
       dice_life: Joi.number().required(),
     }),
@@ -55,6 +60,9 @@ routes_others.get(
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_class_id
 );
@@ -65,6 +73,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_classes
 );
@@ -76,6 +87,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
     }),
   }),
@@ -88,6 +100,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_color_eye
 );
@@ -99,6 +114,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
     }),
   }),
@@ -111,6 +127,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_color_hair
 );
@@ -122,6 +141,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
     }),
   }),
@@ -134,6 +154,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_color_skin
 );
@@ -145,6 +168,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
     }),
   }),
@@ -157,6 +181,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_languages
 );
@@ -168,6 +195,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
       circle: Joi.string().required(),
       level: Joi.number().required(),
@@ -191,6 +219,9 @@ routes_others.get(
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_magic_id
 );
@@ -201,6 +232,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_magics
 );
@@ -212,6 +246,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
       initials: Joi.string().required().length(2),
     }),
@@ -228,6 +263,9 @@ routes_others.get(
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_money_id
 );
@@ -238,6 +276,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_money
 );
@@ -249,6 +290,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
       level: Joi.number().required(),
       force_add: Joi.number().required(),
@@ -274,6 +316,9 @@ routes_others.get(
     [Segments.PARAMS]: Joi.object().keys({
       id: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_race_id
 );
@@ -284,6 +329,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_races
 );
@@ -297,6 +345,9 @@ routes_others.get(
     [Segments.PARAMS]: Joi.object().keys({
       id_race: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_cross_race_languages
 );
@@ -308,6 +359,7 @@ routes_others.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       name: Joi.string().required(),
       height: Joi.number().required(),
       width: Joi.number().required(),
@@ -322,6 +374,9 @@ routes_others.get(
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
     }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   others.select_all_sizes
 );

@@ -16,6 +16,7 @@ routes_guide_pets.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       id_alignment: Joi.number().required(),
       name: Joi.string().required(),
@@ -35,6 +36,7 @@ routes_guide_pets.get(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
     }),
   }),
@@ -51,6 +53,7 @@ routes_guide_pets.put(
       id_pets: Joi.number().required(),
     }),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       name: Joi.string(),
       height: Joi.number(),
@@ -72,6 +75,7 @@ routes_guide_pets.delete(
       id_pets: Joi.number().required(),
     }),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
     }),
   }),

@@ -104,6 +104,9 @@ routes_table.get(
     [Segments.PARAMS]: Joi.object().keys({
       id_user: Joi.number().required(),
     }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+    }),
   }),
   table.select_cross_user_tables
 );
@@ -116,6 +119,9 @@ routes_table.get(
     }).unknown(),
     [Segments.PARAMS]: Joi.object().keys({
       id_table: Joi.number().required(),
+    }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
     }),
   }),
   table.select_cross_table_users
@@ -130,6 +136,9 @@ routes_table.put(
     [Segments.PARAMS]: Joi.object().keys({
       id_user: Joi.number().required(),
       id_table: Joi.number().required(),
+    }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
     }),
   }),
   table.delete_cross_user_table

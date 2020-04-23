@@ -23,41 +23,24 @@ routes_session.post(
 routes_session.get(
   "/session",
   celebrate({
-    [Segments.HEADERS]: Joi.object({
-      authorization: Joi.string().required(),
-    }).unknown(),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+      token: Joi.string().required(),
+    }),
   }),
-  session.create
+  session.confirm
 );
 // Delete session
+routes_session.delete(
+  "/session",
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
+      token: Joi.string().required(),
+    }),
+  }),
+  session.delete
+);
 
-// Mod session
-/*
-// ONG
-routes_session.post('/ongs',celebrate({
-   [Segments.BODY] :Joi.object().keys({
-       name: Joi.string().required()
-       ,email: Joi.string().required().email()
-       ,whatsapp: Joi.string().required().min(10).max(11)
-       ,city: Joi.string().required()
-       ,uf: Joi.string().required().length(2)
-   })
-}),ong.create);
-routes_session.get('/ongs',ong.select_all);
-routes_session.get('/ongs/:id',ong.select_id);
-// INCIDENTS
-routes_session.post('/incidents',incident.create);
-routes_session.get('/incidents', celebrate({
-    [Segments.QUERY]:Joi.object().keys({
-        page: Joi.number()
-    })
-}),incident.select_all);
-routes_session.get('/incidents/:id',incident.select_id);
-routes_session.delete('/incidents/:id',celebrate({
-    [Segments.PARAMS]:Joi.object().keys({
-        id: Joi.number().required()
-    })
-}),incident.delete);
-*/
 // Export routes_session
 module.exports = routes_session;

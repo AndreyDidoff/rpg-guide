@@ -16,6 +16,7 @@ routes_guide_magics.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       id_magic: Joi.number().required(),
       vocal_text: Joi.string(),
@@ -35,6 +36,7 @@ routes_guide_magics.get(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
     }),
   }),
@@ -48,6 +50,7 @@ routes_guide_magics.put(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       id_magic: Joi.number().required(),
       vocal_text: Joi.string(),
@@ -67,6 +70,7 @@ routes_guide_magics.delete(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.PARAMS]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_magic: Joi.number().required(),
     }),
   }),

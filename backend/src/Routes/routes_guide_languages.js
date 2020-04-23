@@ -16,6 +16,7 @@ routes_guide_language.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       id_languages: Joi.array().required(),
     }),
@@ -30,6 +31,7 @@ routes_guide_language.get(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
     }),
   }),
@@ -43,6 +45,7 @@ routes_guide_language.put(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       id_languages: Joi.array().required(),
     }),
@@ -57,6 +60,7 @@ routes_guide_language.delete(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       id_languages: Joi.array().required(),
     }),

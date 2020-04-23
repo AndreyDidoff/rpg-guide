@@ -11,11 +11,11 @@ module.exports = {
     // Pega itens do body
     const { name, description = "", resume = "", id_user } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens("RPG_tables", {
         name: name,
@@ -54,8 +54,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -63,12 +63,14 @@ module.exports = {
   async select_table_id(request, res) {
     // Pega todos os paramentros da rota e colocar na variavel
     const { id } = request.params;
+    // Pega itens do body
+    const { id_user } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens(table_db, {
         id: id,
@@ -94,19 +96,21 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
   // Select All Tables
   async select_all_tables(request, res) {
+    // Pega itens do body
+    const { id_user } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens("RPG_tables");
       // Verifica se encontrou itens e seu limite
@@ -130,23 +134,23 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
   // Update Table
   async update_table(request, res) {
     // Pega itens do body
-    let { name = "", description = "", resume = "" } = request.body;
+    let { id_user, name = "", description = "", resume = "" } = request.body;
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_table } = request.params;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens("RPG_tables", {
         id: id_table,
@@ -183,8 +187,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -192,12 +196,14 @@ module.exports = {
   async delete_table(request, res) {
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_table } = request.params;
+    // Pega itens do body
+    const { id_user } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens("RPG_tables", {
         id: id_table,
@@ -217,8 +223,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -228,11 +234,11 @@ module.exports = {
     // Pega itens do body
     const { id_user, id_table, master = 0 } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens("RPG_users_tables", {
         id_user: id_user,
@@ -266,8 +272,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -276,11 +282,11 @@ module.exports = {
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_user } = request.params;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens("RPG_users_tables", {
         id_user: id_user,
@@ -323,8 +329,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -332,12 +338,14 @@ module.exports = {
   async select_cross_table_users(request, res) {
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_table } = request.params;
+    // Pega itens do body
+    const { id_user } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens("RPG_users_tables", {
         id_table: id_table,
@@ -385,8 +393,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -395,11 +403,11 @@ module.exports = {
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_user, id_table } = request.params;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens("RPG_users_tables", {
         id_user: id_user,
@@ -425,8 +433,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },

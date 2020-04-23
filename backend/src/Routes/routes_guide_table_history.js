@@ -16,6 +16,7 @@ routes_guide_table_history.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       id_table: Joi.number().required(),
       history_text: Joi.string().required(),
@@ -35,6 +36,7 @@ routes_guide_table_history.get(
       id_table: Joi.number().required(),
     }),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
     }),
   }),
@@ -51,6 +53,7 @@ routes_guide_table_history.put(
       id_table_history: Joi.number().required(),
     }),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       history_text: Joi.string().required(),
       datetime: Joi.string().required(),
@@ -69,6 +72,7 @@ routes_guide_table_history.delete(
       id_table_history: Joi.number().required(),
     }),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
     }),
   }),

@@ -23,7 +23,7 @@ routes_user.post(
 );
 // Select User id
 routes_user.get(
-  "/user/:id",
+  "/user/:id_user",
   celebrate({
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
@@ -55,7 +55,7 @@ routes_user.put(
 );
 // Delete User
 routes_user.delete(
-  "/user/:id",
+  "/user/:id_user",
   celebrate({
     [Segments.HEADERS]: Joi.object({
       authorization: Joi.string().required(),
@@ -90,6 +90,9 @@ routes_user.get(
     }).unknown(),
     [Segments.QUERY]: Joi.object().keys({
       page: Joi.number(),
+    }),
+    [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
     }),
   }),
   user.select_all_friends

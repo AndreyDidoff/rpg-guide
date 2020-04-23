@@ -39,12 +39,12 @@ module.exports = {
       xp = 0,
     } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Consulta quantos tem no banco
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens(table_db, {
         name: name,
@@ -96,8 +96,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -106,11 +106,11 @@ module.exports = {
     // Pega itens do body
     const { id_user } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se encntra o item
       const res_count_item = await validators.conta_itens(table_db, {
         id_user: id_user,
@@ -164,8 +164,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -182,6 +182,7 @@ module.exports = {
       id_color_skin = null,
       id_race = null,
       id_size = null,
+      id_user,
       age = null,
       charisma = 0,
       constitution = 0,
@@ -202,15 +203,15 @@ module.exports = {
       xp = 0,
     } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se guide existe e pertence ao usuário
       const res_guide = await validators.valida_guide(
         id_guide,
-        res_cod_user.id_user
+        res_user_token.id_user
       );
       // Verifica se usuário pode adicionar
       if (res_guide.res) {
@@ -304,25 +305,27 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
   // Delete All Guides
   async delete_guide(request, res) {
+    // Pega itens do body
+    const { id_user } = request.body;
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_guide } = request.params;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se guide existe e pertence ao usuário
       const res_guide = await validators.valida_guide(
         id_guide,
-        res_cod_user.id_user
+        res_user_token.id_user
       );
       // Verifica se usuário pode adicionar
       if (res_guide.res) {
@@ -339,8 +342,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },

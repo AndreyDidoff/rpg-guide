@@ -16,6 +16,7 @@ routes_guide_weapons.post(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       amount_dice_attack: Joi.number(),
       dice_attack: Joi.number(),
@@ -37,6 +38,7 @@ routes_guide_weapons.get(
       authorization: Joi.string().required(),
     }).unknown(),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
     }),
   }),
@@ -53,6 +55,7 @@ routes_guide_weapons.put(
       id_weapons: Joi.number().required(),
     }),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       amount_dice_attack: Joi.number(),
       dice_attack: Joi.number(),
@@ -77,6 +80,7 @@ routes_guide_weapons.delete(
       id_weapons: Joi.number().required(),
     }),
     [Segments.BODY]: Joi.object().keys({
+      id_user: Joi.number().required(),
       id_guide: Joi.number().required(),
       main: Joi.number().required(),
     }),

@@ -11,6 +11,7 @@ module.exports = {
   async create(request, res) {
     // Pega itens do body
     let {
+      id_user,
       id_guide,
       id_magic,
       vocal_text = "",
@@ -20,15 +21,15 @@ module.exports = {
       description_user = "",
     } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se guide existe e pertence ao usuário
       const res_guide = await validators.valida_guide(
         id_guide,
-        res_cod_user.id_user
+        res_user_token.id_user
       );
       // Verifica se usuário pode adicionar
       if (res_guide.res) {
@@ -81,25 +82,25 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
   // Select All magics
   async select_all_magics(request, res) {
     // Pega itens do body
-    const { id_guide } = request.body;
+    const { id_user, id_guide } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se guide existe e pertence ao usuário
       const res_guide = await validators.valida_guide(
         id_guide,
-        res_cod_user.id_user
+        res_user_token.id_user
       );
       // Verifica se usuário pode adicionar
       if (res_guide.res) {
@@ -143,8 +144,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
@@ -152,6 +153,7 @@ module.exports = {
   async update_magic(request, res) {
     // Pega itens do body
     let {
+      id_user,
       id_guide,
       id_magic,
       vocal_text = "",
@@ -161,15 +163,15 @@ module.exports = {
       description_user = "",
     } = request.body;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se guide existe e pertence ao usuário
       const res_guide = await validators.valida_guide(
         id_guide,
-        res_cod_user.id_user
+        res_user_token.id_user
       );
       // Verifica se usuário pode adicionar
       if (res_guide.res) {
@@ -220,27 +222,27 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
   // Delete magic
   async delete_magic(request, res) {
     // Pega itens do body
-    const { id_guide } = request.body;
+    const { id_user, id_guide } = request.body;
     // Pega todos os paramentros da rota e colocar na variavel
     const { id_magic } = request.params;
     // Pega parametros do Headers para variavel
-    const cod_user = request.headers.authorization;
+    const token = request.headers.authorization;
     // Valida cod_user
-    const res_cod_user = await validators.valida_cod(cod_user);
+    const res_user_token = await validators.valida_user_token(id_user, token);
     // Verifica se encontrou usuário
-    if (res_cod_user.res) {
+    if (res_user_token.res) {
       // Valida se guide existe e pertence ao usuário
       const res_guide = await validators.valida_guide(
         id_guide,
-        res_cod_user.id_user
+        res_user_token.id_user
       );
       // Verifica se usuário pode adicionar
       if (res_guide.res) {
@@ -272,8 +274,8 @@ module.exports = {
       }
     } else {
       // Resposta
-      return res.status(res_cod_user.status).json({
-        msg: res_cod_user.msg,
+      return res.status(res_user_token.status).json({
+        msg: res_user_token.msg,
       });
     }
   },
